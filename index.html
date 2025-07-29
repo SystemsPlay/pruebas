@@ -10,63 +10,49 @@
     <style>
         /* Estilos Globales y Variables CSS */
         :root {
-            /* Paleta de colores profesionales y más oscuros */
-            --primary-dark-blue: #2C3E50; /* Azul oscuro profundo */
-            --secondary-mid-blue: #34495E; /* Azul grisáceo medio */
-            --accent-blue: #4A90E2; /* Azul vibrante para acentos y botones principales */
-            --light-gray: #ECF0F1; /* Fondo muy claro, casi blanco */
-            --medium-gray: #BDC3C7; /* Gris para bordes sutiles */
-            --dark-text: #2C3E50; /* Color principal para texto */
-            --light-text: #F8F9FA; /* Texto claro para fondos oscuros */
-
-            /* Colores de estado */
-            --success-color: #2ECC71; /* Verde esmeralda */
-            --error-color: #E74C3C; /* Rojo ladrillo */
-            --info-color: #3498DB; /* Azul cielo */
-
-            /* Sombras y bordes */
-            --card-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada pero suave */
-            --inner-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08); /* Sombra interna para inputs */
-            --border-radius-main: 12px; /* Mayor radio para contenedores principales */
-            --border-radius-sm: 8px; /* Radio menor para elementos internos */
-            --border-radius-btn: 6px; /* Radio para botones */
-
-            /* Tipografía */
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --font-size-base: 16px;
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #00bcd4;
+            --text-color: #333;
+            --light-text-color: #f9f9f9;
+            --bg-light: #f9f9f9;
+            --bg-dark: #2c3e50;
+            --border-color: #e0e0e0;
+            --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
         }
 
-        /* Reset y box-sizing */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
         body {
-            font-family: var(--font-family);
-            background-color: var(--light-gray);
-            color: var(--dark-text);
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-color);
             line-height: 1.6;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden; /* Previene scroll horizontal no deseado del body */
         }
 
         .container {
             background-color: white;
             padding: 30px;
-            border-radius: var(--border-radius-main);
-            box-shadow: var(--card-shadow);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             width: 100%;
-            max-width: 1400px; /* Mayor ancho máximo */
+            max-width: 1200px;
             display: flex;
             flex-direction: column;
-            gap: 25px; /* Mayor espacio entre secciones */
+            gap: 20px;
         }
 
         /* Estilos para Modales */
@@ -79,73 +65,64 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.7); /* Fondo más oscuro para el modal */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
             justify-content: center;
             align-items: center;
-            padding: 15px;
-            animation: fadeIn 0.3s ease-out; /* Animación de entrada */
+            padding: 10px; /* Padding para modales en pantallas pequeñas */
         }
 
         .modal-content {
-            background-color: white;
-            padding: 35px; /* Mayor padding */
-            border-radius: var(--border-radius-main);
-            box-shadow: var(--card-shadow);
-            width: 95%;
-            max-width: 550px; /* Mayor ancho máximo para modales */
+            background-color: var(--bg-light);
+            margin: auto;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 90%;
+            max-width: 500px;
             position: relative;
-            animation: slideInFromTop 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Animación de entrada */
         }
 
         .close-button {
-            color: var(--medium-gray);
+            color: #aaa;
             position: absolute;
-            top: 15px;
-            right: 25px;
-            font-size: 30px; /* Mayor tamaño */
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
             font-weight: bold;
-            cursor: pointer;
         }
 
         .close-button:hover,
         .close-button:focus {
-            color: var(--dark-text);
+            color: var(--text-color);
+            text-decoration: none;
+            cursor: pointer;
         }
 
         /* Estilos de Botones */
         button {
-            background-color: var(--accent-blue);
-            color: var(--light-text);
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
             border: none;
-            padding: 12px 25px; /* Mayor padding */
-            border-radius: var(--border-radius-btn);
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: var(--font-size-base);
-            font-weight: 600; /* Semi-bold */
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #3a7bd5; /* Tono ligeramente más oscuro en hover */
-            transform: translateY(-2px); /* Pequeño levantamiento */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: var(--secondary-color);
         }
 
         button.outline {
             background-color: transparent;
-            color: var(--accent-blue);
-            border: 2px solid var(--accent-blue);
-            padding: 10px 23px;
-            box-shadow: none;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         button.outline:hover {
-            background-color: var(--accent-blue);
-            color: var(--light-text);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
         }
         
         button.delete {
@@ -153,14 +130,14 @@
         }
 
         button.delete:hover {
-            background-color: #c0392b; /* Darker red */
+            background-color: #c0392b;
         }
 
         /* Estilos de Formularios y Entradas */
         form {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Mayor espacio entre grupos */
+            gap: 15px;
         }
 
         .form-group {
@@ -169,11 +146,9 @@
         }
 
         label {
-            margin-bottom: 8px; /* Más espacio */
-            font-weight: 600; /* Semi-bold */
-            font-size: 0.95em;
-            color: var(--secondary-mid-blue);
-            letter-spacing: 0.3px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
         }
 
         input[type="text"],
@@ -182,26 +157,13 @@
         input[type="number"],
         textarea,
         select {
-            padding: 12px; /* Mayor padding */
-            border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius-sm);
-            font-size: var(--font-size-base);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
             width: 100%;
             background-color: white;
-            color: var(--dark-text);
-            box-shadow: var(--inner-shadow); /* Sombra interna para profundidad */
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus,
-        input[type="date"]:focus,
-        input[type="number"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25), var(--inner-shadow); /* Brillo azul en foco */
+            color: var(--text-color);
         }
 
         input[type="checkbox"] {
@@ -213,7 +175,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 40px);
+            min-height: calc(100vh - 40px); /* Ajuste para el padding del body */
             width: 100%;
         }
 
@@ -224,7 +186,7 @@
         #app-section {
             display: none; /* Oculto por defecto hasta que el usuario inicie sesión */
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
         header {
@@ -232,69 +194,44 @@
             justify-content: space-between;
             align-items: center;
             padding-bottom: 20px;
-            border-bottom: 1px solid var(--medium-gray); /* Borde más suave */
-            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         header h1 {
-            color: var(--primary-dark-blue); /* Color más oscuro para el título principal */
-            font-size: 2.5em; /* Mayor tamaño */
-            font-weight: 700; /* Más audaz */
-            letter-spacing: -0.5px;
+            color: var(--primary-color);
+            font-size: 2em;
         }
 
         .tabs {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px; /* Mayor espacio entre pestañas */
+            flex-wrap: wrap; /* Permite que las pestañas se envuelvan */
+            gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--medium-gray);
-            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .tab-button {
             background-color: transparent;
-            color: var(--secondary-mid-blue);
-            padding: 12px 18px; /* Mayor padding */
+            color: var(--text-color);
+            padding: 10px 15px;
             border: none;
             border-bottom: 3px solid transparent;
-            font-size: 1.05em;
+            font-size: 1em;
             cursor: pointer;
             transition: all 0.3s ease;
-            white-space: nowrap;
-            font-weight: 500;
-            position: relative;
-            overflow: hidden; /* Para el efecto de brillo */
-        }
-
-        .tab-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.5s ease;
-            transform: skewX(-20deg);
-        }
-
-        .tab-button:hover::before {
-            left: 100%;
+            white-space: nowrap; /* Evita que el texto de la pestaña se rompa */
         }
 
         .tab-button.active {
-            color: var(--primary-dark-blue);
-            border-bottom-color: var(--accent-blue);
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
             font-weight: bold;
-            background-color: var(--light-gray); /* Fondo sutil para la pestaña activa */
-            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* Bordes redondeados superiores */
         }
 
         .tab-content {
             display: none;
-            padding: 25px 0; /* Más padding */
-            animation: fadeIn 0.6s ease-out; /* Animación más suave y lenta */
+            padding: 20px 0;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         .tab-content.active {
@@ -302,205 +239,149 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slideInFromTop {
-            from { opacity: 0; transform: translateY(-50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
 
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px; /* Mayor espacio */
+            margin-bottom: 15px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
         .section-header h2 {
-            font-size: 2em; /* Mayor tamaño */
-            color: var(--primary-dark-blue);
-            font-weight: 600;
+            font-size: 1.8em;
+            color: var(--secondary-color);
         }
 
         .summary-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Mayor min-width */
-            gap: 25px; /* Mayor espacio */
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
         .card {
-            background-color: white;
-            padding: 25px; /* Mayor padding */
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--card-shadow);
+            background-color: var(--bg-light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .card h3 {
-            color: var(--secondary-mid-blue);
-            margin-bottom: 12px;
-            font-size: 1.2em;
-            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
 
         .card p {
-            font-size: 2.2em; /* Mayor tamaño */
+            font-size: 1.8em;
             font-weight: bold;
-            color: var(--primary-dark-blue);
-            letter-spacing: -0.5px;
+            color: var(--secondary-color);
         }
 
         .chart-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Mayor min-width para gráficos */
-            gap: 25px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .chart-container {
-            background-color: white;
-            padding: 25px;
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--card-shadow);
+            background-color: var(--bg-light);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
         .chart-container h3 {
-            margin-bottom: 20px;
-            color: var(--primary-dark-blue);
+            margin-bottom: 15px;
+            color: var(--primary-color);
             text-align: center;
             width: 100%;
-            font-size: 1.3em;
-            font-weight: 600;
         }
         .chart-canvas {
             width: 100% !important;
-            height: 350px !important; /* Mayor altura para gráficos */
+            height: 300px !important; /* Altura fija para gráficos */
         }
 
-        /* Tabla de Transacciones y Tipos Predefinidos */
+        /* Tabla de Transacciones */
         .transactions-table-container {
-            overflow-x: auto; /* Permite el scroll horizontal */
-            margin-top: 25px;
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--card-shadow);
-            background-color: white;
+            overflow-x: auto; /* Permite el scroll horizontal en tablas */
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
 
         .transactions-table {
             width: 100%;
-            min-width: 768px; /* Ancho mínimo para la tabla para asegurar scroll */
+            min-width: 600px; /* Ancho mínimo para la tabla */
             border-collapse: collapse;
-            border-radius: var(--border-radius-sm);
-            overflow: hidden; /* Asegura que el border-radius se respete */
         }
 
         .transactions-table th,
         .transactions-table td {
-            padding: 15px 20px; /* Mayor padding */
+            border: 1px solid var(--border-color);
+            padding: 12px;
             text-align: left;
             white-space: nowrap; /* Evita el salto de línea en celdas */
-            border-bottom: 1px solid var(--medium-gray); /* Bordes más sutiles */
         }
 
         .transactions-table th {
-            background-color: var(--primary-dark-blue); /* Fondo azul oscuro para encabezados */
-            color: var(--light-text);
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
             font-weight: bold;
             text-transform: uppercase;
             font-size: 0.9em;
-            letter-spacing: 0.8px;
-            position: sticky; /* Encabezados fijos al scroll horizontal */
-            top: 0;
-            z-index: 10;
-        }
-
-        /* Quitar borde de la última fila */
-        .transactions-table tbody tr:last-child td {
-            border-bottom: none;
         }
 
         .transactions-table tr:nth-child(even) {
-            background-color: #F8F8F8; /* Raya muy sutil */
+            background-color: #f2f2f2;
         }
 
         .transactions-table tr:hover {
-            background-color: #F0F2F5; /* Efecto hover suave */
+            background-color: #e0e0e0;
         }
 
-        /* Estilos específicos para Movimiento en tabla */
-        .transactions-table td {
-            font-size: 0.9em;
-            color: var(--dark-text);
-        }
-        .transactions-table td:nth-child(2) { /* Targeting "Movimiento" column */
-            font-weight: 600; /* Semi-bold */
-        }
-        .transactions-table td .Ingreso {
-            color: var(--success-color); /* Verde para Ingreso */
-        }
-        .transactions-table td .Egreso {
-            color: var(--error-color); /* Rojo para Egreso */
-        }
-        .transactions-table td:nth-child(5) { /* Monto */
-            font-weight: 600;
-            text-align: right; /* Monto alineado a la derecha */
-        }
-
-        .transactions-table td .actions {
-            text-align: center; /* Centrar botones de acción */
-        }
         .transactions-table td .actions button {
-            padding: 8px 15px; /* Padding ajustado para botones de acción */
+            padding: 5px 10px;
             font-size: 0.8em;
-            margin: 0 5px; /* Más espacio entre botones */
-            min-width: unset;
-            border-radius: var(--border-radius-btn);
+            margin-right: 5px;
+            min-width: unset; /* Reinicia el min-width para botones de acción */
         }
-        /* Estilo para botón 'Editar' en tabla */
-        .transactions-table td .actions button.outline {
-            background-color: var(--accent-blue);
-            color: var(--light-text);
-            border: none;
+        .transactions-table td .actions button:last-child {
+            margin-right: 0;
         }
-        .transactions-table td .actions button.outline:hover {
-            background-color: #3a7bd5;
-        }
-
 
         /* Estilos para el Toast/Notificación */
         #toast {
             visibility: hidden;
-            min-width: 280px; /* Mayor ancho */
-            background-color: var(--primary-dark-blue); /* Fondo oscuro */
-            color: var(--light-text);
+            min-width: 250px;
+            margin-left: -125px; /* Centrar */
+            background-color: #333;
+            color: #fff;
             text-align: center;
-            border-radius: var(--border-radius-sm);
-            padding: 18px; /* Mayor padding */
+            border-radius: 8px;
+            padding: 16px;
             position: fixed;
-            z-index: 1001;
+            z-index: 1001; /* Sobre los modales */
             left: 50%;
-            bottom: 40px; /* Más arriba */
-            font-size: 1.1em;
-            box-shadow: var(--card-shadow);
-            transform: translateX(-50%);
+            bottom: 30px;
+            font-size: 17px;
+            box-shadow: var(--box-shadow);
+            transform: translateX(-50%); /* Ajuste fino para centrar */
         }
 
         #toast.show {
             visibility: visible;
             -webkit-animation: fadeInToast 0.5s, fadeOutToast 0.5s 2.5s;
-            animation: fadeInToast 0.5s forwards, fadeOutToast 0.5s forwards 2.5s; /* 'forwards' para mantener el estado final */
+            animation: fadeInToast 0.5s, fadeOutToast 0.5s 2.5s;
         }
         #toast.success { background-color: var(--success-color); }
         #toast.error { background-color: var(--error-color); }
@@ -508,75 +389,72 @@
 
         @-webkit-keyframes fadeInToast {
             from {bottom: 0; opacity: 0;}
-            to {bottom: 40px; opacity: 1;}
+            to {bottom: 30px; opacity: 1;}
         }
 
         @keyframes fadeInToast {
             from {bottom: 0; opacity: 0;}
-            to {bottom: 40px; opacity: 1;}
+            to {bottom: 30px; opacity: 1;}
         }
 
         @-webkit-keyframes fadeOutToast {
-            from {bottom: 40px; opacity: 1;}
+            from {bottom: 30px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
 
         @keyframes fadeOutToast {
-            from {bottom: 40px; opacity: 1;}
+            from {bottom: 30px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
 
         /* Estilos para filtros */
         .filters {
-            display: grid; /* Usar grid para mejor control */
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Columnas más flexibles */
-            gap: 20px; /* Mayor espacio */
-            margin-bottom: 25px;
-            padding: 25px; /* Mayor padding */
-            background-color: white;
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--card-shadow);
-            align-items: end; /* Alinear elementos al final de su celda */
+            display: flex;
+            flex-wrap: wrap; /* Permite que los filtros se envuelvan a la siguiente línea */
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
 
         .filters .form-group {
-            min-width: unset; /* Permitir que grid maneje el ancho */
-            max-width: unset;
+            flex: 1 1 auto; /* Permite que los elementos se expandan y contraigan */
+            min-width: 150px; /* Ancho mínimo para cada filtro */
         }
         
         .filters button {
-            grid-column: span var(--filter-button-span, 1); /* Ajustable por media query */
-            width: auto; /* Ancho automático basado en grid */
-            margin-top: auto; /* Empuja el botón hacia abajo si las celdas tienen diferentes alturas */
+            align-self: flex-end; /* Alinea el botón al final de la línea si hay espacio */
+            flex-shrink: 0; /* Evita que el botón se encoja */
+            min-width: 100px;
         }
 
         .dashboard-controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 25px;
-            padding: 20px;
-            background-color: white;
-            border-radius: var(--border-radius-sm);
-            box-shadow: var(--card-shadow);
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
         .dashboard-controls .form-group {
-            flex: 1 1 180px; /* Mayor min-width */
-            min-width: 180px;
+            flex: 1 1 auto;
+            min-width: 120px;
         }
 
 
         /* Media Queries para Responsividad */
 
-        /* Para pantallas muy pequeñas (ej. <480px) */
+        /* Para pantallas muy pequeñas (ej. 240px - 480px) */
         @media (max-width: 480px) {
             body {
                 padding: 10px;
-                font-size: 14px; /* Tamaño de fuente base más pequeño */
             }
             .container {
                 padding: 15px;
-                gap: 15px;
             }
             header {
                 flex-direction: column;
@@ -584,228 +462,97 @@
                 align-items: flex-start;
             }
             header h1 {
-                font-size: 1.8em;
-            }
-            .tabs {
-                flex-direction: column; /* Pestañas apiladas */
-                gap: 5px;
-                border-bottom: none;
+                font-size: 1.6em;
             }
             .tab-button {
-                padding: 10px 12px;
+                padding: 8px 10px;
                 font-size: 0.9em;
-                width: 100%;
+                width: 100%; /* Las pestañas ocupan todo el ancho */
                 text-align: left;
-                border-bottom: 1px solid var(--medium-gray);
-                border-radius: var(--border-radius-sm);
-            }
-            .tab-button.active {
-                border-bottom: 1px solid var(--accent-blue);
-                border-left: 5px solid var(--accent-blue); /* Borde lateral para activo */
-                background-color: rgba(74, 144, 226, 0.1); /* Fondo muy suave */
-                border-radius: var(--border-radius-sm);
             }
             .section-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
-                margin-bottom: 15px;
             }
             .section-header h2 {
                 font-size: 1.5em;
             }
-            .summary-cards {
-                grid-template-columns: 1fr; /* Una columna */
-                gap: 15px;
-            }
-            .card {
-                padding: 20px;
-            }
-            .card p {
-                font-size: 1.8em;
-            }
-            .filters {
-                grid-template-columns: 1fr; /* Una columna para filtros */
-                padding: 15px;
-                gap: 15px;
-                --filter-button-span: 1; /* El botón ocupa 1 columna */
-            }
-            .filters button {
-                width: 100%;
-            }
-            .dashboard-controls {
+            .filters, .dashboard-controls {
                 flex-direction: column;
                 align-items: stretch;
-                padding: 15px;
+                padding: 10px;
             }
-            .dashboard-controls .form-group {
+            .filters .form-group, .filters button,
+            .dashboard-controls .form-group, .dashboard-controls button {
                 width: 100%;
                 min-width: unset;
             }
             .modal-content {
                 padding: 20px;
-                width: 98%; /* Más pequeño */
-                max-width: 350px; /* Límite para modales */
+                width: 95%;
             }
             .close-button {
-                font-size: 26px;
+                font-size: 24px;
                 right: 15px;
-                top: 10px;
-            }
-            .transactions-table {
-                min-width: 500px; /* Asegura scroll en móviles */
             }
             .transactions-table th, .transactions-table td {
-                padding: 10px 12px; /* Menor padding */
-                font-size: 0.85em;
-            }
-            .transactions-table td .actions button {
-                padding: 6px 10px;
-                font-size: 0.75em;
-                margin: 0 3px;
-            }
-            .chart-canvas {
-                height: 280px !important; /* Menor altura para gráficos */
-            }
-        }
-
-        /* Para pantallas muy muy pequeñas (ej. <320px) */
-        @media (max-width: 320px) {
-            body {
-                padding: 5px;
-                font-size: 12px;
-            }
-            .container {
-                padding: 10px;
-                border-radius: 8px;
-            }
-            header h1 {
-                font-size: 1.5em;
-            }
-            .tab-button {
-                padding: 8px 10px;
+                padding: 8px;
                 font-size: 0.8em;
             }
-            .section-header h2 {
-                font-size: 1.2em;
-            }
-            .card {
-                padding: 15px;
-            }
-            .card p {
-                font-size: 1.5em;
-            }
-            .filters {
-                padding: 10px;
-                gap: 10px;
-            }
-            input, select, textarea {
-                padding: 8px;
-                font-size: 0.9em;
-            }
-            button {
-                padding: 8px 15px;
-                font-size: 0.9em;
-            }
-            .modal-content {
-                padding: 15px;
-            }
-            .close-button {
-                font-size: 22px;
-            }
-            .transactions-table {
-                min-width: 400px; /* Mantiene un mínimo para scroll */
-            }
-            .transactions-table th, .transactions-table td {
-                padding: 6px 8px;
-                font-size: 0.75em;
-            }
             .transactions-table td .actions button {
-                padding: 3px 6px;
-                font-size: 0.65em;
-                margin: 0 2px;
-            }
-            .chart-canvas {
-                height: 200px !important; /* Mínima altura */
+                padding: 4px 8px;
+                font-size: 0.7em;
             }
         }
-
 
         /* Para pantallas medianas (ej. 481px - 768px) */
         @media (min-width: 481px) and (max-width: 768px) {
             .container {
                 padding: 20px;
-                gap: 20px;
             }
             header {
-                flex-direction: row; /* Vuelve a fila */
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
-            header h1 {
-                font-size: 2.2em;
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
-            .tabs {
-                flex-direction: row; /* Vuelve a fila */
-                justify-content: flex-start;
-                gap: 10px;
-                border-bottom: 1px solid var(--medium-gray);
+            .filters, .dashboard-controls {
+                padding: 15px;
             }
-            .tab-button {
-                width: auto;
-                text-align: center;
-                border-bottom: 3px solid transparent;
-                border-left: none; /* Eliminar borde lateral */
-                background-color: transparent;
-                border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
-            }
-            .filters {
-                grid-template-columns: repeat(2, 1fr); /* Dos columnas */
-                --filter-button-span: 2; /* El botón ocupa 2 columnas */
-            }
-            .dashboard-controls {
-                grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+            .filters .form-group, .filters button,
+            .dashboard-controls .form-group, .dashboard-controls button {
+                min-width: 45%; /* Dos columnas en pantallas medianas */
             }
             .chart-grid {
                 grid-template-columns: 1fr; /* Una columna para los gráficos */
-            }
-            .transactions-table {
-                min-width: 600px; /* Asegura scroll en tablets verticales */
-            }
-            .modal-content {
-                width: 85%;
-                max-width: 450px;
             }
         }
 
         /* Para pantallas grandes (ej. 769px - 1024px) */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .filters {
-                grid-template-columns: repeat(3, 1fr); /* Tres columnas */
-                --filter-button-span: 3;
-            }
-            .dashboard-controls {
-                grid-template-columns: repeat(3, 1fr); /* Tres columnas */
+            .filters .form-group, .filters button,
+            .dashboard-controls .form-group, .dashboard-controls button {
+                min-width: 30%; /* Tres columnas en pantallas grandes */
             }
             .chart-grid {
-                grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* 2 columnas o más */
             }
         }
 
         /* Para pantallas muy grandes (ej. 1025px - 1400px+) */
         @media (min-width: 1025px) {
-            .filters {
-                grid-template-columns: repeat(5, 1fr); /* Cinco columnas para filtros */
-                --filter-button-span: 1; /* El botón vuelve a 1 columna al final */
+            .container {
+                max-width: 1400px;
             }
-            .filters .form-group:nth-last-child(2) { /* Último form-group antes del botón */
-                grid-column: span 1; /* Asegura que el último input sea de 1 columna */
-            }
-            .dashboard-controls {
-                grid-template-columns: repeat(3, 1fr); /* Tres columnas para dashboard controls */
+            .filters .form-group, .filters button,
+            .dashboard-controls .form-group, .dashboard-controls button {
+                min-width: 200px; /* Ancho suficiente para 4 o 5 columnas */
             }
             .chart-grid {
-                grid-template-columns: repeat(3, 1fr); /* Tres columnas para gráficos */
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Dos o más columnas, más espacio */
             }
         }
     </style>
@@ -908,12 +655,7 @@
 
                 <div class="filters">
                     <div class="form-group">
-                        <label for="filter-year">Año:</label>
-                        <select id="filter-year">
-                            </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filter-month">Mes:</label>
+                        <label for="filter-month">Filtrar por Mes:</label>
                         <select id="filter-month">
                             <option value="">Todos</option>
                             <option value="1">Enero</option>
@@ -931,13 +673,13 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-type">Tipo:</label>
+                        <label for="filter-type">Filtrar por Tipo:</label>
                         <select id="filter-type">
                             <option value="">Todos</option>
                             </select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-movement">Movimiento:</label>
+                        <label for="filter-movement">Filtrar por Movimiento:</label>
                         <select id="filter-movement">
                             <option value="">Todos</option>
                             <option value="Ingreso">Ingreso</option>
@@ -946,7 +688,7 @@
                     </div>
                     <div class="form-group">
                         <label for="filter-keywords">Buscar:</label>
-                        <input type="text" id="filter-keywords" placeholder="Descripción, monto...">
+                        <input type="text" id="filter-keywords" placeholder="Descripción, ID...">
                     </div>
                     <button id="apply-filters-button">Aplicar Filtros</button>
                 </div>
@@ -955,6 +697,7 @@
                     <table class="transactions-table">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Fecha</th>
                                 <th>Movimiento</th>
                                 <th>Tipo</th>
@@ -1198,7 +941,6 @@
         const toast = document.getElementById('toast');
 
         // Filtros
-        const filterYearSelect = document.getElementById('filter-year'); // Added for year filter
         const filterMonthSelect = document.getElementById('filter-month');
         const filterTypeSelect = document.getElementById('filter-type');
         const filterMovementSelect = document.getElementById('filter-movement');
@@ -1301,7 +1043,6 @@
                     appSection.style.display = 'flex';
                     showToast(result.message, 'success');
                     initializeDashboardControls(); // Configura los select de mes/año del dashboard
-                    initializeFilterYearSelect(); // Populate filter year select
                     loadAppData(); // Cargar datos al iniciar sesión
                 } else {
                     showToast(result.message, 'error');
@@ -1364,45 +1105,25 @@
                 showToast('Error al cargar datos iniciales. Por favor, revisa la consola.', 'error');
             }
         }
-        
-        // Populate year dropdown for filters and dashboard
-        function initializeYearSelect(selectElement) {
-            const currentYear = new Date().getFullYear();
-            selectElement.innerHTML = ''; // Clear existing options
-            
-            // Add "Todos" option only for filter year select
-            if (selectElement === filterYearSelect) {
-                const allOption = document.createElement('option');
-                allOption.value = '';
-                allOption.textContent = 'Todos';
-                selectElement.appendChild(allOption);
-            }
 
+        // Inicializa los select de mes y año del dashboard
+        function initializeDashboardControls() {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1; // getMonth() es 0-indexado
+
+            // Rellenar años (ej. de 5 años atrás a 5 años adelante)
+            dashboardYearSelect.innerHTML = '';
             for (let i = currentYear - 5; i <= currentYear + 5; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
-                selectElement.appendChild(option);
+                dashboardYearSelect.appendChild(option);
             }
-            // Set current year as default for dashboard, and for filter if not 'Todos'
-            if (selectElement === dashboardYearSelect || selectElement === filterYearSelect) {
-                selectElement.value = currentYear;
-            }
-        }
 
-        // Initialize dashboard month/year controls
-        function initializeDashboardControls() {
-            initializeYearSelect(dashboardYearSelect); // Use generic function
-            const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-indexed
+            // Seleccionar el mes y año actuales por defecto
             dashboardMonthSelect.value = currentMonth;
+            dashboardYearSelect.value = currentYear;
         }
-
-        // Initialize filter year select specifically
-        function initializeFilterYearSelect() {
-            initializeYearSelect(filterYearSelect); // Use generic function for filter year
-            filterYearSelect.value = new Date().getFullYear(); // Set current year as default for filter to match image
-        }
-
 
         // Actualiza el dashboard completo (resumen y gráficos)
         function updateDashboard() {
@@ -1442,7 +1163,7 @@
                 if (t.Movimiento === 'Ingreso') {
                     totalIncomePeriod += t.Monto;
                 } else if (t.Movimiento === 'Egreso') {
-                    totalExpensePeriod -= t.Monto;
+                    totalExpensePeriod += t.Monto;
                 }
             });
             totalIncomeMonthElement.textContent = `$${totalIncomePeriod.toFixed(2)}`;
@@ -1478,37 +1199,33 @@
             const expenses = sortedMonths.map(month => monthlyData[month].expense);
 
             financialChart = new Chart(financialChartCanvas, {
-                type: 'line',
+                type: 'line', // Cambiado a línea para curvas
                 data: {
                     labels: sortedMonths,
                     datasets: [
                         {
                             label: 'Ingresos',
                             data: incomes,
-                            backgroundColor: 'rgba(74, 144, 226, 0.2)', /* Fondo más suave */
-                            borderColor: 'rgba(74, 144, 226, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
                             borderWidth: 2,
                             fill: true,
-                            tension: 0.4 /* Curva */
+                            tension: 0.4 // Curva
                         },
                         {
                             label: 'Egresos',
                             data: expenses,
-                            backgroundColor: 'rgba(231, 76, 60, 0.2)', /* Fondo más suave */
+                            backgroundColor: 'rgba(231, 76, 60, 0.6)',
                             borderColor: 'rgba(231, 76, 60, 1)',
                             borderWidth: 2,
                             fill: true,
-                            tension: 0.4 /* Curva */
+                            tension: 0.4 // Curva
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: { /* Animación más suave al cargar */
-                        duration: 1000,
-                        easing: 'easeOutQuart'
-                    },
                     plugins: {
                         tooltip: {
                             callbacks: {
@@ -1516,48 +1233,20 @@
                                     return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
                                 }
                             }
-                        },
-                        legend: {
-                            labels: {
-                                font: {
-                                    size: 14, /* Tamaño de fuente para leyenda */
-                                    weight: 'bold'
-                                },
-                                color: '#333'
-                            }
                         }
                     },
                     scales: {
                         x: {
                             title: {
                                 display: true,
-                                text: 'Mes',
-                                color: '#555',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            ticks: {
-                                color: '#666'
+                                text: 'Mes'
                             }
                         },
                         y: {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Monto ($)',
-                                color: '#555',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            ticks: {
-                                color: '#666',
-                                callback: function(value) {
-                                    return `$${value.toFixed(2)}`;
-                                }
+                                text: 'Monto ($)'
                             }
                         }
                     }
@@ -1579,22 +1268,9 @@
             const commonChartOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: { /* Animación de donut */
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 1200,
-                    easing: 'easeOutQuart'
-                },
                 plugins: {
                     legend: {
                         position: 'right',
-                        labels: {
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            },
-                            color: '#333'
-                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -1615,18 +1291,15 @@
                         },
                         color: '#fff',
                         font: {
-                            weight: 'bold',
-                            size: 12
-                        },
-                        textShadowBlur: 2, /* Sombra de texto para legibilidad */
-                        textShadowColor: 'rgba(0,0,0,0.6)'
+                            weight: 'bold'
+                        }
                     }
                 },
             };
 
-            const professionalColors = [
-                '#4A90E2', '#2ECC71', '#F39C12', '#9B59B6', '#E74C3C', '#1ABC9C', /* Azules, verdes, naranjas, morados, rojos */
-                '#3498DB', '#95A5A6', '#D35400', '#2C3E50', '#7F8C8D', '#C0392B'
+            const colors = [
+                '#667eea', '#764ba2', '#00bcd4', '#FFC107', '#E91E63', '#9C27B0',
+                '#4CAF50', '#CDDC39', '#FF9800', '#03A9F4', '#F44336', '#607D8B'
             ];
 
             // Gráfico de Ingresos por Tipo
@@ -1636,8 +1309,8 @@
                     labels: Object.keys(incomeTypes),
                     datasets: [{
                         data: Object.values(incomeTypes),
-                        backgroundColor: professionalColors,
-                        borderColor: 'white',
+                        backgroundColor: colors,
+                        borderColor: '#fff',
                         borderWidth: 2,
                     }]
                 },
@@ -1651,8 +1324,8 @@
                     labels: Object.keys(expenseTypes),
                     datasets: [{
                         data: Object.values(expenseTypes),
-                        backgroundColor: professionalColors,
-                        borderColor: 'white',
+                        backgroundColor: colors,
+                        borderColor: '#fff',
                         borderWidth: 2,
                     }]
                 },
@@ -1667,16 +1340,15 @@
         function renderTransactions(transactionsToRender) {
             transactionsList.innerHTML = ''; // Limpiar tabla
             if (transactionsToRender.length === 0) {
-                transactionsList.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #777;">No hay transacciones para mostrar.</td></tr>';
+                transactionsList.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay transacciones para mostrar.</td></tr>';
                 return;
             }
             transactionsToRender.forEach(transaction => {
                 const row = transactionsList.insertRow();
-                // Apply specific classes for movement styling
-                const movementClass = transaction.Movimiento === 'Ingreso' ? 'Ingreso' : 'Egreso';
                 row.innerHTML = `
+                    <td>${transaction.ID}</td>
                     <td>${transaction.Fecha}</td>
-                    <td><span class="${movementClass}">${transaction.Movimiento}</span></td>
+                    <td>${transaction.Movimiento}</td>
                     <td>${transaction.Tipo}</td>
                     <td>${transaction.Descripcion || ''}</td>
                     <td>$${parseFloat(transaction.Monto).toFixed(2)}</td>
@@ -1824,7 +1496,7 @@
             predefinedExpensesList.innerHTML = '';
 
             if (types.incomes.length === 0) {
-                predefinedIncomesList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #777;">No hay ingresos predefinidos.</td></tr>';
+                predefinedIncomesList.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay ingresos predefinidos.</td></tr>';
             } else {
                 types.incomes.forEach(item => {
                     const row = predefinedIncomesList.insertRow();
@@ -1842,7 +1514,7 @@
             }
 
             if (types.expenses.length === 0) {
-                predefinedExpensesList.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #777;">No hay egresos predefinidos.</td></tr>';
+                predefinedExpensesList.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay egresos predefinidos.</td></tr>';
             } else {
                 types.expenses.forEach(item => {
                     const row = predefinedExpensesList.insertRow();
@@ -1979,18 +1651,10 @@
         function applyFilters() {
             let filteredTransactions = [...allTransactions]; // Copia de todas las transacciones
 
-            const selectedYear = filterYearSelect.value;
             const selectedMonth = filterMonthSelect.value;
             const selectedType = filterTypeSelect.value;
             const selectedMovement = filterMovementSelect.value;
             const keywords = filterKeywordsInput.value.toLowerCase().trim();
-
-            if (selectedYear) {
-                filteredTransactions = filteredTransactions.filter(t => {
-                    const transactionDate = new Date(t.Fecha);
-                    return transactionDate.getFullYear() === parseInt(selectedYear);
-                });
-            }
 
             if (selectedMonth) {
                 filteredTransactions = filteredTransactions.filter(t => {
@@ -2082,7 +1746,6 @@
                 loginSection.style.display = 'none';
                 appSection.style.display = 'flex';
                 initializeDashboardControls(); // Configura los select de mes/año del dashboard
-                initializeFilterYearSelect(); // Populate filter year select
                 loadAppData(); // Cargar datos al iniciar sesión
             } else {
                 loginSection.style.display = 'flex';
@@ -2107,7 +1770,6 @@
 
             // Event listeners para los filtros
             applyFiltersButton.addEventListener('click', applyFilters);
-            filterYearSelect.addEventListener('change', applyFilters); // New filter year select event
             filterMonthSelect.addEventListener('change', applyFilters);
             filterTypeSelect.addEventListener('change', applyFilters);
             filterMovementSelect.addEventListener('change', applyFilters);
