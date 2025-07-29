@@ -888,755 +888,750 @@
     <div id="greetingMessage" class="greeting-message"></div>
 
     <script>
-        // ¡IMPORTANTE! Reemplaza con la URL de tu Google Apps Script desplegado como aplicación web
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbymBcf4ut-aL3DJshdpiO5t3UEEJiIT8PmWVPYqSIl_-nW8PST_BoZVmHVV2vlZsBM36w/exec'; // <--- ¡ACTUALIZA ESTA URL!
 
-        // Elementos del DOM
-        const loginSection = document.getElementById('loginSection');
-        const appSection = document.getElementById('appSection');
-        const loginForm = document.getElementById('loginForm');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginMessage = document.getElementById('loginMessage');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const logoutButton = document.getElementById('logoutButton');
-        const greetingMessageEl = document.getElementById('greetingMessage');
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymBcf4ut-aL3DJshdpiO5t3UEEJiIT8PmWVPYqSIl_-nW8PST_BoZVmHVV2vlZsBM36w/exec';
+    let currentChart; // Variable global para la instancia del gráfico
 
-        const currentBalanceEl = document.getElementById('currentBalance');
-        const totalIncomesEl = document.getElementById('totalIncomes');
-        const totalExpensesEl = document.getElementById('totalExpenses');
-        const incomeChartCanvas = document.getElementById('incomeChart');
-        const expenseChartCanvas = document.getElementById('expenseChart');
-        let incomeChartInstance, expenseChartInstance;
+    // Elementos del DOM (asegúrate de que los IDs coincidan con tu HTML)
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginForm = document.getElementById('login-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const logoutButton = document.getElementById('logout-button');
 
-        const transactionForm = document.getElementById('transactionForm');
-        const transactionDateInput = document.getElementById('transactionDate');
-        const transactionMovementSelect = document.getElementById('transactionMovement');
-        const transactionTypeSelect = document.getElementById('transactionType');
-        const transactionDescriptionInput = document.getElementById('transactionDescription');
-        const transactionAmountInput = document.getElementById('transactionAmount');
-        const transactionMessage = document.getElementById('transactionMessage');
-        const transactionsTableBody = document.querySelector('#transactionsTable tbody');
+    const transactionsTableBody = document.getElementById('transactions-table-body');
+    const predefinedTypesTableBody = document.getElementById('predefined-types-table-body');
 
-        const addPredefinedForm = document.getElementById('addPredefinedForm');
-        const addPredefinedMovementSelect = document.getElementById('addPredefinedMovement');
-        const addPredefinedTypeInput = document.getElementById('addPredefinedTypeInput');
-        const addPredefinedDescriptionInput = document.getElementById('addPredefinedDescription');
-        const addPredefinedAmountInput = document.getElementById('addPredefinedAmount');
-        const addPredefinedMessage = document.getElementById('addPredefinedMessage');
-        const predefinedTypesList = document.getElementById('predefinedTypesList');
+    // Formularios y botones
+    const transactionForm = document.getElementById('transaction-form');
+    const transactionDateInput = document.getElementById('transaction-date');
+    const transactionMovementSelect = document.getElementById('transaction-movement');
+    const transactionTypeSelect = document.getElementById('transaction-type');
+    const transactionDescriptionInput = document.getElementById('transaction-description');
+    const transactionAmountInput = document.getElementById('transaction-amount');
+    const transactionIdInput = document.getElementById('transaction-id'); // Campo oculto para edición
 
-        // Elementos para filtros de transacciones
-        const filterYearSelect = document.getElementById('filterYear'); // Nuevo
-        const filterMonthSelect = document.getElementById('filterMonth');
-        const filterTypeSelect = document.getElementById('filterType');
-        const filterMovementSelect = document.getElementById('filterMovement');
-        const filterKeywordsInput = document.getElementById('filterKeywords');
-        const applyFiltersButton = document.getElementById('applyFiltersButton');
+    const addPredefinedForm = document.getElementById('add-predefined-form');
+    const addPredefinedMovementSelect = document.getElementById('add-predefined-movement');
+    const addPredefinedTypeInput = document.getElementById('add-predefined-type');
+    const addPredefinedDescriptionInput = document.getElementById('add-predefined-description');
+    const addPredefinedSuggestedAmountInput = document.getElementById('add-predefined-suggested-amount');
 
-        // Variables globales para datos
-        let allTransactions = []; // Almacena todas las transacciones sin filtrar
-        let allPredefinedTypes = { incomes: [], expenses: [] }; // Almacena tipos predefinidos
+    const editTransactionForm = document.getElementById('edit-transaction-form');
+    const editTransactionIdInput = document.getElementById('edit-transaction-id');
+    const editTransactionDateInput = document.getElementById('edit-transaction-date');
+    const editTransactionMovementSelect = document.getElementById('edit-transaction-movement');
+    const editTransactionTypeSelect = document.getElementById('edit-transaction-type');
+    const editTransactionDescriptionInput = document.getElementById('edit-transaction-description');
+    const editTransactionAmountInput = document.getElementById('edit-transaction-amount');
 
-        // --- Funciones de Utilidad ---
-        async function fetchData(action, method = 'GET', body = null) {
-            let url = `${WEB_APP_URL}?action=${action}`;
-            const options = { method };
+    const editPredefinedForm = document.getElementById('edit-predefined-form');
+    const editPredefinedOldTypeInput = document.getElementById('edit-predefined-old-type');
+    const editPredefinedOldMovementInput = document.getElementById('edit-predefined-old-movement');
+    const editPredefinedNewTypeInput = document.getElementById('edit-predefined-new-type');
+    const editPredefinedNewMovementSelect = document.getElementById('edit-predefined-new-movement');
+    const editPredefinedNewDescriptionInput = document.getElementById('edit-predefined-new-description');
+    const editPredefinedNewAmountInput = document.getElementById('edit-predefined-new-amount');
 
-            if (method === 'GET' && body) {
-                // For GET requests, append parameters to the URL
-                const params = new URLSearchParams(body).toString();
-                url = `${url}&${params}`;
-            } else if (method !== 'GET' && body) {
-                options.headers = { 'Content-Type': 'application/json' };
-                options.body = JSON.stringify(body);
+
+    // Modals
+    const addTransactionModal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+    const editTransactionModal = new bootstrap.Modal(document.getElementById('editTransactionModal'));
+    const addPredefinedModal = new bootstrap.Modal(document.getElementById('addPredefinedModal'));
+    const editPredefinedModal = new bootstrap.Modal(document.getElementById('editPredefinedModal'));
+
+
+    // Elementos de filtros
+    const filterYearSelect = document.getElementById('filter-year');
+    const filterMonthSelect = document.getElementById('filter-month');
+    const filterTypeSelect = document.getElementById('filter-type');
+    const filterMovementSelect = document.getElementById('filter-movement');
+    const filterKeywordsInput = document.getElementById('filter-keywords');
+    const applyFiltersButton = document.getElementById('apply-filters-button');
+
+
+    // Función para mostrar mensajes toast
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            console.error("No se encontró el contenedor de toasts.");
+            return;
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0 fade show`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.hide();
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }, 5000); // El toast desaparece después de 5 segundos
+    }
+
+    // Funciones de spinner de carga
+    function showLoadingSpinner() {
+        document.getElementById('loading-spinner').style.display = 'flex';
+    }
+
+    function hideLoadingSpinner() {
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+
+    // *** INICIO DEL CAMBIO CRÍTICO PARA ELIMINAR EL ERROR CORS ***
+    async function fetchData(action, method = 'GET', data = null) {
+        let url = `${APP_SCRIPT_URL}?action=${action}`; // La acción siempre va en la URL
+
+        const options = { method: method };
+
+        if (method === 'GET' && data) {
+            // Para GET, los parámetros van en la URL
+            const params = new URLSearchParams(data).toString();
+            url = `${url}&${params}`;
+        } else if (method !== 'GET' && data) {
+            // *** AQUI CAMBIAMOS PARA ENVIAR COMO FORMULARIO URL-ENCODED EN LUGAR DE JSON ***
+            options.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            options.body = new URLSearchParams(data).toString(); // Convertir el objeto 'data' a string URL-encoded
+        }
+
+        try {
+            showLoadingSpinner();
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
             }
-
-            try {
-                const response = await fetch(url, options);
-                // Check for non-200 responses specifically
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                    alert(`❌ Error del servidor: ${response.status} - ${errorText.substring(0, 100)}...`);
-                    return null;
-                }
-                const data = await response.json();
-                if (data.status === 'error') {
-                    alert(data.message);
-                    return null;
-                }
-                return data;
-            } catch (error) {
-                console.error(`Error en fetchData para acción ${action}:`, error);
-                alert('❌ Error de conexión con el servidor. Revisa la consola para más detalles.');
-                return null;
-            }
+            const result = await response.json(); // Se sigue esperando una respuesta JSON del Apps Script
+            return result;
+        } catch (error) {
+            console.error(`Error en fetchData para acción ${action}:`, error);
+            showToast(`Error: ${error.message}`, 'error');
+            throw error;
+        } finally {
+            hideLoadingSpinner();
         }
+    }
+    // *** FIN DEL CAMBIO CRÍTICO PARA ELIMINAR EL ERROR CORS ***
 
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(amount);
-        }
+    // Funciones de autenticación
+    async function handleLogin(event) {
+        event.preventDefault();
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-        function truncateString(str, maxLength) {
-            if (!str) return '';
-            if (str.length <= maxLength) return str;
-            return str.substring(0, maxLength) + '...';
-        }
+        try {
+            const result = await fetchData('authenticateUser', 'POST', { action: 'authenticateUser', email, password });
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                sessionStorage.setItem('loggedIn', 'true');
+                showDashboard();
+                await Promise.all([
+                    fetchTransactions(),
+                    fetchPredefinedTypes(),
+                    populateFilterOptions(),
+                    updateDashboard()
+                ]);
 
-        // --- Funciones de Autenticación ---
-        async function handleLogin(event) {
-            event.preventDefault();
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            loadingOverlay.classList.add('visible'); // Mostrar spinner
-            loginMessage.textContent = 'Iniciando sesión...';
-            loginMessage.style.color = 'blue';
-
-            const data = await fetchData('authenticateUser', 'GET', { username, password });
-
-            loadingOverlay.classList.remove('visible'); // Ocultar spinner
-
-            if (data && data.status === 'success') {
-                localStorage.setItem('loggedIn', 'true');
-                localStorage.setItem('currentUser', username); // Guarda el nombre de usuario
-                loginSection.style.display = 'none';
-                appSection.style.display = 'flex';
-                loginMessage.textContent = '';
-                await loadAppData(); // Cargar datos de la app y asegurar que years estén disponibles
-                showGreetingMessage(username); // Mostrar saludo
             } else {
-                loginMessage.textContent = (data && data.message) ? data.message : 'Error de autenticación.';
-                loginMessage.style.color = 'red';
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error de conexión o credenciales inválidas.', 'error');
+            console.error('Login error:', error);
         }
+    }
 
-        function handleLogout() {
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('currentUser'); // Elimina el nombre de usuario
-            appSection.style.display = 'none';
-            loginSection.style.display = 'flex';
-            usernameInput.value = '';
-            passwordInput.value = '';
-            loginMessage.textContent = 'Sesión cerrada.';
-            // Limpiar gráficos y tablas si es necesario
-            if (incomeChartInstance) incomeChartInstance.destroy();
-            if (expenseChartInstance) expenseChartInstance.destroy();
-            transactionsTableBody.innerHTML = '';
-            predefinedTypesList.innerHTML = '';
-            greetingMessageEl.classList.remove('show'); // Ocultar saludo
-        }
+    function handleLogout() {
+        sessionStorage.removeItem('loggedIn');
+        showLogin();
+    }
 
-        function showGreetingMessage(username) {
-            greetingMessageEl.textContent = `Hola ${username}, ¡Buen Día! Dios te proveerá.`;
-            greetingMessageEl.classList.add('show');
-            setTimeout(() => {
-                greetingMessageEl.classList.remove('show');
-            }, 5000); // El mensaje desaparece después de 5 segundos
-        }
+    function showLogin() {
+        loginSection.style.display = 'block';
+        dashboardSection.style.display = 'none';
+        emailInput.value = '';
+        passwordInput.value = '';
+    }
 
-        // --- Funciones de Carga y Renderizado de Datos ---
-        async function loadAppData() {
-            await fetchDataAndRender(); // Carga todo y renderiza
-            populateFilterYears(); // Rellena los años de filtro
-            applyFilters(); // Aplica filtros iniciales (mostrará todo al inicio)
-            updateCharts(); // Actualiza los gráficos del dashboard
-            showTab('dashboard'); // Muestra el dashboard por defecto
-        }
+    function showDashboard() {
+        loginSection.style.display = 'none';
+        dashboardSection.style.display = 'block';
+    }
 
-        async function fetchDataAndRender() {
-            const transactionsResult = await fetchData('getAllTransactions');
-            if (transactionsResult && transactionsResult.data) {
-                allTransactions = transactionsResult.data; // Almacena todas las transacciones
+    // Funciones para Transacciones
+    async function fetchTransactions() {
+        try {
+            const result = await fetchData('getAllTransactions', 'GET');
+            if (result.status === 'success') {
+                displayTransactions(result.data);
             } else {
-                allTransactions = [];
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al cargar transacciones.', 'error');
+        }
+    }
 
-            const predefinedResult = await fetchData('getPredefinedTypes');
-            if (predefinedResult) {
-                allPredefinedTypes = {
-                    incomes: predefinedResult.incomes || [],
-                    expenses: predefinedResult.expenses || []
-                };
-                renderPredefinedTypes();
-                populateTransactionTypeDropdowns(); // Rellena los dropdowns de tipo de transacción
+    function displayTransactions(transactions) {
+        transactionsTableBody.innerHTML = '';
+        const sortedTransactions = transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        sortedTransactions.forEach(transaction => {
+            const row = transactionsTableBody.insertRow();
+            row.dataset.id = transaction.id; // Guarda el ID para fácil acceso
+            row.insertCell(0).textContent = transaction.date;
+            row.insertCell(1).textContent = transaction.movement;
+            row.insertCell(2).textContent = transaction.type;
+            row.insertCell(3).textContent = transaction.description;
+            row.insertCell(4).textContent = parseFloat(transaction.amount).toFixed(2);
+
+            const actionsCell = row.insertCell(5);
+            const editButton = document.createElement('button');
+            editButton.className = 'btn btn-sm btn-info me-2';
+            editButton.textContent = 'Editar';
+            editButton.onclick = () => openEditTransactionModal(transaction.id);
+            actionsCell.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-sm btn-danger';
+            deleteButton.textContent = 'Eliminar';
+            deleteButton.onclick = () => handleDeleteTransaction(transaction.id);
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    async function handleTransactionSubmit(event) {
+        event.preventDefault();
+        const date = transactionDateInput.value;
+        const movement = transactionMovementSelect.value;
+        const type = transactionTypeSelect.value;
+        const description = transactionDescriptionInput.value;
+        const amount = transactionAmountInput.value;
+
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
+            const result = await fetchData('addTransaction', 'POST', { action: 'addTransaction', date, movement, type, description, amount });
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                transactionForm.reset();
+                addTransactionModal.hide(); // Cierra el modal
+                fetchTransactions(); // Refresca la lista de transacciones
+                updateDashboard(); // Actualiza el dashboard
             } else {
-                allPredefinedTypes = { incomes: [], expenses: [] };
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al añadir transacción.', 'error');
         }
+    }
 
-        function populateFilterYears() {
-            filterYearSelect.innerHTML = '<option value="all">Todos</option>';
-            const years = new Set();
-            allTransactions.forEach(t => {
-                const year = t.Fecha ? new Date(t.Fecha).getFullYear().toString() : '';
-                if (year) years.add(year);
-            });
+    function openEditTransactionModal(id) {
+        // Encuentra la fila en la tabla para obtener los datos actuales
+        const row = document.querySelector(`#transactions-table-body tr[data-id='${id}']`);
+        if (row) {
+            const cells = row.cells;
+            editTransactionIdInput.value = id;
+            editTransactionDateInput.value = cells[0].textContent;
+            editTransactionMovementSelect.value = cells[1].textContent;
+            editTransactionTypeSelect.value = cells[2].textContent;
+            editTransactionDescriptionInput.value = cells[3].textContent;
+            editTransactionAmountInput.value = parseFloat(cells[4].textContent).toFixed(2);
 
-            // Ordenar los años de forma descendente
-            const sortedYears = Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+            editTransactionModal.show(); // Muestra el modal de edición
+        } else {
+            showToast('No se encontró la transacción para editar.', 'error');
+        }
+    }
 
-            sortedYears.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                filterYearSelect.appendChild(option);
-            });
+    async function handleEditTransactionSubmit(event) {
+        event.preventDefault();
+        const id = editTransactionIdInput.value;
+        const date = editTransactionDateInput.value;
+        const movement = editTransactionMovementSelect.value;
+        const type = editTransactionTypeSelect.value;
+        const description = editTransactionDescriptionInput.value;
+        const amount = editTransactionAmountInput.value;
 
-            // Seleccionar el año actual por defecto si existe, o "Todos"
-            const currentYear = new Date().getFullYear().toString();
-            if (sortedYears.includes(currentYear)) {
-                filterYearSelect.value = currentYear;
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
+            const result = await fetchData('updateTransaction', 'POST', { action: 'updateTransaction', id, date, movement, type, description, amount });
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                editTransactionModal.hide(); // Cierra el modal
+                fetchTransactions(); // Refresca la lista de transacciones
+                updateDashboard(); // Actualiza el dashboard
             } else {
-                filterYearSelect.value = 'all';
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al actualizar transacción.', 'error');
         }
+    }
 
-        function renderTransactions(transactionsToDisplay = allTransactions) {
-            transactionsTableBody.innerHTML = ''; // Limpia la tabla
-            if (transactionsToDisplay.length === 0) {
-                transactionsTableBody.innerHTML = '<tr><td colspan="6">No hay transacciones para mostrar.</td></tr>';
-                return;
+    async function handleDeleteTransaction(id) {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta transacción?')) {
+            return;
+        }
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
+            const result = await fetchData('deleteTransaction', 'POST', { action: 'deleteTransaction', id });
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                fetchTransactions(); // Refresca la lista de transacciones
+                updateDashboard(); // Actualiza el dashboard
+            } else {
+                showToast(result.message, 'error');
             }
-
-            transactionsToDisplay.forEach(transaction => {
-                const row = transactionsTableBody.insertRow();
-                // Asegúrate de que transaction.Fecha sea una fecha válida antes de formatear
-                const transactionDate = transaction.Fecha ? new Date(transaction.Fecha) : null;
-                const displayDate = transactionDate ? transactionDate.toISOString().split('T')[0] : '';
-                const displayDescription = truncateString(transaction.Descripcion, 25); // Truncar descripción
-
-                row.innerHTML = `
-                    <td>${displayDate}</td>
-                    <td style="color: ${transaction.Movimiento === 'Ingreso' ? '#2ECC71' : '#E74C3C'}; font-weight: bold;">${transaction.Movimiento || ''}</td>
-                    <td>${transaction.Tipo || ''}</td>
-                    <td>${displayDescription}</td>
-                    <td>${formatCurrency(transaction.Monto || 0)}</td>
-                    <td class="actions">
-                        <button class="edit-button" data-id="${transaction.ID}">Editar</button>
-                        <button class="delete-button" data-id="${transaction.ID}">Eliminar</button>
-                    </td>
-                `;
-            });
-
-            // Añadir event listeners a los nuevos botones
-            document.querySelectorAll('.edit-button').forEach(button => {
-                button.onclick = (e) => openEditTransactionModal(e.target.dataset.id);
-            });
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.onclick = (e) => handleDeleteTransaction(e.target.dataset.id);
-            });
+        } catch (error) {
+            showToast('Error al eliminar transacción.', 'error');
         }
+    }
 
-        function renderPredefinedTypes() {
-            predefinedTypesList.innerHTML = '';
-            const allTypes = [...allPredefinedTypes.incomes, ...allPredefinedTypes.expenses];
-
-            if (allTypes.length === 0) {
-                predefinedTypesList.innerHTML = '<p>No hay tipos predefinidos.</p>';
-                return;
+    // Funciones para Tipos Predefinidos
+    async function fetchPredefinedTypes() {
+        try {
+            const result = await fetchData('getPredefinedTypes', 'GET');
+            if (result.status === 'success') {
+                displayPredefinedTypes(result.data);
+                populateTransactionTypeSelect(result.data); // Llena el select de tipos de transacción
+            } else {
+                showToast(result.message, 'error');
             }
-
-            allTypes.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('predefined-item', item.movement === 'Ingreso' ? 'income' : 'expense');
-                listItem.innerHTML = `
-                    <strong>${item.type || 'N/A'}</strong>
-                    <div class="details">
-                        <p>Movimiento: ${item.movement || 'N/A'}</p>
-                        <p>Descripción: ${truncateString(item.description, 30) || 'N/A'}</p>
-                        <p>Monto Sugerido: ${formatCurrency(item.suggestedAmount || 0)}</p>
-                    </div>
-                    <div class="actions">
-                        <button class="edit-button" data-type="${item.type}" data-movement="${item.movement}">Editar</button>
-                        <button class="delete-button" data-type="${item.type}" data-movement="${item.movement}">Eliminar</button>
-                    </div>
-                `;
-                predefinedTypesList.appendChild(listItem);
-            });
-
-            // Añadir event listeners para editar/eliminar tipos predefinidos
-            document.querySelectorAll('#predefinedTypesList .edit-button').forEach(button => {
-                button.onclick = (e) => openEditPredefinedModal(e.target.dataset.type, e.target.dataset.movement);
-            });
-            document.querySelectorAll('#predefinedTypesList .delete-button').forEach(button => {
-                button.onclick = (e) => handleDeletePredefined(e.target.dataset.type, e.target.dataset.movement);
-            });
+        } catch (error) {
+            showToast('Error al cargar tipos predefinidos.', 'error');
         }
+    }
 
-        function populateTransactionTypeDropdowns() {
-            // Limpiar dropdowns
-            transactionTypeSelect.innerHTML = '<option value="">Seleccione</option>';
-            filterTypeSelect.innerHTML = '<option value="all">Todos</option>';
-            document.getElementById('editType').innerHTML = ''; // Para el modal de edición de transacción
+    function displayPredefinedTypes(predefinedTypes) {
+        predefinedTypesTableBody.innerHTML = '';
+        predefinedTypes.forEach(type => {
+            const row = predefinedTypesTableBody.insertRow();
+            row.insertCell(0).textContent = type.movement;
+            row.insertCell(1).textContent = type.type;
+            row.insertCell(2).textContent = type.description || ''; // Puede no tener descripción
+            row.insertCell(3).textContent = (type.suggestedAmount !== null && type.suggestedAmount !== undefined) ? parseFloat(type.suggestedAmount).toFixed(2) : '';
 
-            const allTypesCombined = [
-                ...allPredefinedTypes.incomes.map(t => t.type),
-                ...allPredefinedTypes.expenses.map(t => t.type)
-            ].filter((value, index, self) => self.indexOf(value) === index); // Eliminar duplicados
+            const actionsCell = row.insertCell(4);
+            const editButton = document.createElement('button');
+            editButton.className = 'btn btn-sm btn-info me-2';
+            editButton.textContent = 'Editar';
+            editButton.onclick = () => openEditPredefinedModal(type.type, type.movement);
+            actionsCell.appendChild(editButton);
 
-            allTypesCombined.forEach(type => {
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-sm btn-danger';
+            deleteButton.textContent = 'Eliminar';
+            deleteButton.onclick = () => handleDeletePredefined(type.type, type.movement);
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    function populateTransactionTypeSelect(predefinedTypes) {
+        transactionTypeSelect.innerHTML = '<option value="">Selecciona un Tipo</option>';
+        editTransactionTypeSelect.innerHTML = '<option value="">Selecciona un Tipo</option>';
+
+        const typesByMovement = {};
+        predefinedTypes.forEach(pType => {
+            if (!typesByMovement[pType.movement]) {
+                typesByMovement[pType.movement] = [];
+            }
+            typesByMovement[pType.movement].push(pType.type);
+        });
+
+        const selectedMovement = transactionMovementSelect.value;
+        const editSelectedMovement = editTransactionMovementSelect.value;
+
+        if (selectedMovement && typesByMovement[selectedMovement]) {
+            typesByMovement[selectedMovement].sort().forEach(type => {
                 const option = document.createElement('option');
                 option.value = type;
                 option.textContent = type;
-                transactionTypeSelect.appendChild(option.cloneNode(true));
-                filterTypeSelect.appendChild(option.cloneNode(true));
-                document.getElementById('editType').appendChild(option.cloneNode(true)); // Para el modal
+                transactionTypeSelect.appendChild(option);
+            });
+        }
+        if (editSelectedMovement && typesByMovement[editSelectedMovement]) {
+            typesByMovement[editSelectedMovement].sort().forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                editTransactionTypeSelect.appendChild(option);
             });
         }
 
-        // --- Lógica de Dashboard y Gráficos ---
-        function updateCharts() {
-            const totalIncome = allTransactions.filter(t => t.Movimiento === 'Ingreso').reduce((sum, t) => sum + (t.Monto || 0), 0);
-            const totalExpense = allTransactions.filter(t => t.Movimiento === 'Egreso').reduce((sum, t) => sum + (t.Monto || 0), 0);
-            const currentBalance = totalIncome - totalExpense;
+        // Si ya hay un valor seleccionado, intenta mantenerlo
+        const currentTransactionTypeValue = transactionTypeSelect.dataset.currentValue;
+        if (currentTransactionTypeValue) {
+            transactionTypeSelect.value = currentTransactionTypeValue;
+            delete transactionTypeSelect.dataset.currentValue; // Limpiar el valor temporal
+        }
+        const currentEditTransactionTypeValue = editTransactionTypeSelect.dataset.currentValue;
+        if (currentEditTransactionTypeValue) {
+            editTransactionTypeSelect.value = currentEditTransactionTypeValue;
+            delete editTransactionTypeSelect.dataset.currentValue; // Limpiar el valor temporal
+        }
+    }
 
-            currentBalanceEl.textContent = formatCurrency(currentBalance);
-            totalIncomesEl.textContent = formatCurrency(totalIncome);
-            totalExpensesEl.textContent = formatCurrency(totalExpense);
 
-            // Destruir instancias de gráficos antiguas para evitar superposición
-            if (incomeChartInstance) incomeChartInstance.destroy();
-            if (expenseChartInstance) expenseChartInstance.destroy();
-
-            // Datos para gráficos de tipo
-            const incomeTypes = {};
-            allTransactions.filter(t => t.Movimiento === 'Ingreso').forEach(t => {
-                incomeTypes[t.Tipo] = (incomeTypes[t.Tipo] || 0) + (t.Monto || 0);
-            });
-
-            const expenseTypes = {};
-            allTransactions.filter(t => t.Movimiento === 'Egreso').forEach(t => {
-                expenseTypes[t.Tipo] = (expenseTypes[t.Tipo] || 0) + (t.Monto || 0);
-            });
-
-            incomeChartInstance = new Chart(incomeChartCanvas, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(incomeTypes),
-                    datasets: [{
-                        data: Object.values(incomeTypes),
-                        backgroundColor: [
-                            '#2ECC71', '#4A90E2', '#00BCD4', '#FFC107', '#FF5722',
-                            '#9C27B0', '#607D8B', '#795548', '#FF9800', '#CDDC39'
-                        ],
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: { size: 12, family: "'Segoe UI', 'Roboto', sans-serif" }
-                            }
-                        },
-                        title: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += formatCurrency(context.parsed);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
+    // Autocompletar campos de transacción desde tipos predefinidos
+    async function populateTransactionFieldsFromPredefined() {
+        const movement = transactionMovementSelect.value;
+        const type = transactionTypeSelect.value;
+        if (movement && type) {
+            try {
+                const result = await fetchData('getPredefinedTypeDetails', 'GET', { movement, type });
+                if (result.status === 'success' && result.data) {
+                    transactionDescriptionInput.value = result.data.description || '';
+                    transactionAmountInput.value = (result.data.suggestedAmount !== null && result.data.suggestedAmount !== undefined) ? parseFloat(result.data.suggestedAmount).toFixed(2) : '';
                 }
-            });
-
-            expenseChartInstance = new Chart(expenseChartCanvas, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(expenseTypes),
-                    datasets: [{
-                        data: Object.values(expenseTypes),
-                        backgroundColor: [
-                            '#E74C3C', '#FF9800', '#FFEB3B', '#8BC34A', '#00BCD4',
-                            '#3F51B5', '#673AB7', '#E91E63', '#9E9E9E', '#795548'
-                        ],
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: { size: 12, family: "'Segoe UI', 'Roboto', sans-serif" }
-                            }
-                        },
-                        title: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += formatCurrency(context.parsed);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- Lógica de Filtros ---
-        function applyFilters() {
-            const year = filterYearSelect.value;
-            const month = filterMonthSelect.value;
-            const type = filterTypeSelect.value;
-            const movement = filterMovementSelect.value;
-            const keywords = filterKeywordsInput.value.toLowerCase().trim();
-
-            let filteredTransactions = allTransactions.filter(transaction => {
-                const transactionDate = new Date(transaction.Fecha);
-                const transactionYear = transactionDate.getFullYear().toString();
-                const transactionMonth = (transactionDate.getMonth() + 1).toString().padStart(2, '0'); // 01-12
-
-                const transactionType = transaction.Tipo ? transaction.Tipo.toLowerCase() : '';
-                const transactionMovement = transaction.Movimiento ? transaction.Movimiento.toLowerCase() : '';
-                const transactionDescription = transaction.Descripcion ? transaction.Descripcion.toLowerCase() : '';
-                const transactionAmount = (transaction.Monto || 0).toString();
-
-                const yearMatch = year === 'all' || transactionYear === year;
-                const monthMatch = month === 'all' || transactionMonth === month;
-                const typeMatch = type === 'all' || transactionType === type.toLowerCase();
-                const movementMatch = movement === 'all' || transactionMovement === movement.toLowerCase();
-                const keywordMatch = keywords === '' ||
-                                     transactionDescription.includes(keywords) ||
-                                     transactionAmount.includes(keywords);
-
-                return yearMatch && monthMatch && typeMatch && movementMatch && keywordMatch;
-            });
-
-            renderTransactions(filteredTransactions);
-        }
-
-        // --- Manejo de Transacciones ---
-        async function handleTransactionSubmit(event) {
-            event.preventDefault();
-            const date = transactionDateInput.value;
-            const movement = transactionMovementSelect.value;
-            const type = transactionTypeSelect.value;
-            const description = transactionDescriptionInput.value;
-            const amount = parseFloat(transactionAmountInput.value);
-
-            if (!date || !movement || !type || isNaN(amount)) {
-                transactionMessage.textContent = 'Por favor, rellena todos los campos obligatorios.';
-                transactionMessage.style.color = 'red';
-                return;
-            }
-
-            transactionMessage.textContent = 'Guardando transacción...';
-            transactionMessage.style.color = 'blue';
-
-            const result = await fetchData('addTransaction', 'POST', { action: 'addTransaction', date, movement, type, description, amount });
-
-            if (result && result.status === 'success') {
-                transactionMessage.textContent = 'Transacción guardada exitosamente.';
-                transactionMessage.style.color = 'green';
-                transactionForm.reset();
-                transactionDateInput.value = new Date().toISOString().split('T')[0];
-                await fetchDataAndRender(); // Re-fetch y renderiza todo para actualizar tablas y charts
-            } else {
-                transactionMessage.textContent = result ? result.message : 'Error al guardar la transacción.';
-                transactionMessage.style.color = 'red';
+            } catch (error) {
+                console.error('Error al autocompletar campos:', error);
             }
         }
-
-        async function handleDeleteTransaction(id) {
-            if (!confirm('¿Estás seguro de que quieres eliminar esta transacción?')) {
-                return;
-            }
-
-            const result = await fetchData('deleteTransaction', 'POST', { action: 'deleteTransaction', id });
-
-            if (result && result.status === 'success') {
-                alert('Transacción eliminada exitosamente.');
-                await fetchDataAndRender(); // Re-fetch y renderiza todo
-            } else {
-                alert(result ? result.message : 'Error al eliminar la transacción.');
-            }
-        }
-
-        // --- Autocompletar transacción con tipo predefinido ---
-        function populateTransactionFieldsFromPredefined() {
-            const selectedType = transactionTypeSelect.value;
-            const selectedMovement = transactionMovementSelect.value;
-
-            const predefinedItem = [...allPredefinedTypes.incomes, ...allPredefinedTypes.expenses]
-                                    .find(item => item.type === selectedType && item.movement === selectedMovement);
-
-            if (predefinedItem) {
-                if (predefinedItem.description) {
-                    transactionDescriptionInput.value = predefinedItem.description;
-                }
-                if (predefinedItem.suggestedAmount !== undefined && predefinedItem.suggestedAmount !== null) {
-                    transactionAmountInput.value = parseFloat(predefinedItem.suggestedAmount).toFixed(2);
-                }
-            } else {
-                // Si no hay un tipo predefinido correspondiente o se selecciona "Seleccione"
-                // No limpiar, solo no autocompletar.
-                // Podrías decidir limpiar si el usuario cambia de un predefinido a uno no predefinido,
-                // pero por ahora, solo completamos si encontramos match.
-            }
-        }
+    }
 
 
-        // --- Modales y Manejo de Edición de Transacción ---
-        const editTransactionModal = document.getElementById('editTransactionModal');
-        const editTransactionForm = document.getElementById('editTransactionForm');
-        const editTransactionIdInput = document.getElementById('editTransactionId');
-        const editDateInput = document.getElementById('editDate');
-        const editMovementSelect = document.getElementById('editMovement');
-        const editTypeSelect = document.getElementById('editType');
-        const editDescriptionInput = document.getElementById('editDescription');
-        const editAmountInput = document.getElementById('editAmount');
-        const cancelEditButton = document.getElementById('cancelEditButton');
+    async function handleAddPredefinedType(event) {
+        event.preventDefault();
+        const movement = addPredefinedMovementSelect.value;
+        const type = addPredefinedTypeInput.value;
+        const description = addPredefinedDescriptionInput.value;
+        const suggestedAmount = addPredefinedSuggestedAmountInput.value;
 
-        function openEditTransactionModal(transactionId) {
-            const transactionToEdit = allTransactions.find(t => t.ID === transactionId);
-            if (!transactionToEdit) {
-                alert('Transacción no encontrada para editar.');
-                return;
-            }
-
-            editTransactionIdInput.value = transactionToEdit.ID;
-            editDateInput.value = transactionToEdit.Fecha;
-            editMovementSelect.value = transactionToEdit.Movimiento;
-
-            populateTransactionTypeDropdowns(); // Asegurarse de que los tipos estén cargados
-            // Esperar un ciclo para que el DOM se actualice con las opciones
-            setTimeout(() => {
-                editTypeSelect.value = transactionToEdit.Tipo;
-            }, 0);
-
-
-            editDescriptionInput.value = transactionToEdit.Descripcion;
-            editAmountInput.value = transactionToEdit.Monto;
-
-            editTransactionModal.classList.add('visible');
-        }
-
-        async function handleEditTransactionSubmit(event) {
-            event.preventDefault();
-            const id = editTransactionIdInput.value;
-            const date = editDateInput.value;
-            const movement = editMovementSelect.value;
-            const type = editTypeSelect.value;
-            const description = editDescriptionInput.value;
-            const amount = parseFloat(editAmountInput.value);
-
-            if (!id || !date || !movement || !type || isNaN(amount)) {
-                alert('Por favor, rellena todos los campos obligatorios para editar.');
-                return;
-            }
-
-            const result = await fetchData('updateTransaction', 'POST', { action: 'updateTransaction', id, date, movement, type, description, amount });
-
-            if (result && result.status === 'success') {
-                alert('Transacción actualizada exitosamente.');
-                editTransactionModal.classList.remove('visible');
-                await fetchDataAndRender();
-            } else {
-                alert(result ? result.message : 'Error al actualizar la transacción.');
-            }
-        }
-
-        cancelEditButton.onclick = () => {
-            editTransactionModal.classList.remove('visible');
-        };
-
-        // --- Manejo de Tipos Predefinidos ---
-        async function handleAddPredefinedType(event) {
-            event.preventDefault();
-            const movement = addPredefinedMovementSelect.value;
-            const type = addPredefinedTypeInput.value.trim();
-            const description = addPredefinedDescriptionInput.value.trim();
-            const suggestedAmount = parseFloat(addPredefinedAmountInput.value);
-
-            if (!movement || !type) {
-                addPredefinedMessage.textContent = 'Por favor, selecciona movimiento y tipo.';
-                addPredefinedMessage.style.color = 'red';
-                return;
-            }
-
-            addPredefinedMessage.textContent = 'Añadiendo tipo...';
-            addPredefinedMessage.style.color = 'blue';
-
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
             const result = await fetchData('addPredefined', 'POST', { action: 'addPredefined', movement, type, description, suggestedAmount });
-
-            if (result && result.status === 'success') {
-                addPredefinedMessage.textContent = 'Tipo predefinido añadido exitosamente.';
-                addPredefinedMessage.style.color = 'green';
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
                 addPredefinedForm.reset();
-                await fetchDataAndRender(); // Re-fetch y renderiza todo
+                addPredefinedModal.hide();
+                fetchPredefinedTypes(); // Refresca la lista de tipos predefinidos
             } else {
-                addPredefinedMessage.textContent = result ? result.message : 'Error al añadir el tipo predefinido.';
-                addPredefinedMessage.style.color = 'red';
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al añadir tipo predefinido.', 'error');
         }
+    }
 
-        async function handleDeletePredefined(type, movement) {
-            if (!confirm(`¿Estás seguro de que quieres eliminar el tipo predefinido "${type}" (${movement})?`)) {
-                return;
+    function openEditPredefinedModal(type, movement) {
+        // Encuentra la fila para obtener los datos
+        const row = Array.from(predefinedTypesTableBody.rows).find(r =>
+            r.cells[0].textContent === movement && r.cells[1].textContent === type
+        );
+
+        if (row) {
+            editPredefinedOldTypeInput.value = type;
+            editPredefinedOldMovementInput.value = movement;
+            editPredefinedNewTypeInput.value = row.cells[1].textContent;
+            editPredefinedNewMovementSelect.value = row.cells[0].textContent;
+            editPredefinedNewDescriptionInput.value = row.cells[2].textContent;
+            editPredefinedNewAmountInput.value = row.cells[3].textContent;
+
+            editPredefinedModal.show();
+        } else {
+            showToast('No se encontró el tipo predefinido para editar.', 'error');
+        }
+    }
+
+    async function handleEditPredefinedSubmit(event) {
+        event.preventDefault();
+        const oldType = editPredefinedOldTypeInput.value;
+        const oldMovement = editPredefinedOldMovementInput.value;
+        const newType = editPredefinedNewTypeInput.value;
+        const newMovement = editPredefinedNewMovementSelect.value;
+        const newDescription = editPredefinedNewDescriptionInput.value;
+        const newAmount = editPredefinedNewAmountInput.value;
+
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
+            const result = await fetchData('updatePredefined', 'POST', { action: 'updatePredefined', oldType, oldMovement, newType, newMovement, newDescription, newAmount });
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                editPredefinedModal.hide();
+                fetchPredefinedTypes(); // Refresca la lista
+            } else {
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al actualizar tipo predefinido.', 'error');
+        }
+    }
 
+    async function handleDeletePredefined(type, movement) {
+        if (!confirm('¿Estás seguro de que quieres eliminar este tipo predefinido?')) {
+            return;
+        }
+        try {
+            // *** CAMBIO AQUI: Incluir 'action' en el body para POST ***
             const result = await fetchData('deletePredefined', 'POST', { action: 'deletePredefined', type, movement });
-
-            if (result && result.status === 'success') {
-                alert('Tipo predefinido eliminado exitosamente.');
-                await fetchDataAndRender(); // Re-fetch y renderiza todo
+            if (result.status === 'success') {
+                showToast(result.message, 'success');
+                fetchPredefinedTypes(); // Refresca la lista
             } else {
-                alert(result ? result.message : 'Error al eliminar el tipo predefinido.');
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al eliminar tipo predefinido.', 'error');
         }
+    }
 
-        // --- Modales y Manejo de Edición de Tipo Predefinido ---
-        const editPredefinedModal = document.getElementById('editPredefinedModal');
-        const editPredefinedForm = document.getElementById('editPredefinedForm');
-        const editOldPredefinedTypeInput = document.getElementById('editOldPredefinedType');
-        const editOldPredefinedMovementInput = document.getElementById('editOldPredefinedMovement');
-        const editPredefinedMovementSelect = document.getElementById('editPredefinedMovement');
-        const editPredefinedTypeInput = document.getElementById('editPredefinedTypeInput');
-        const editPredefinedDescriptionInput = document.getElementById('editPredefinedDescription');
-        const editPredefinedAmountInput = document.getElementById('editPredefinedAmount');
-        const cancelEditPredefinedButton = document.getElementById('cancelEditPredefinedButton');
 
-        function openEditPredefinedModal(oldType, oldMovement) {
-            const itemToEdit = [...allPredefinedTypes.incomes, ...allPredefinedTypes.expenses]
-                                .find(item => item.type === oldType && item.movement === oldMovement);
+    // Funciones de filtrado
+    async function applyFilters() {
+        const year = filterYearSelect.value;
+        const month = filterMonthSelect.value;
+        const type = filterTypeSelect.value;
+        const movement = filterMovementSelect.value;
+        const keywords = filterKeywordsInput.value;
 
-            if (!itemToEdit) {
-                alert('Tipo predefinido no encontrado para editar.');
-                return;
-            }
+        try {
+            const filters = {};
+            if (year) filters.year = year;
+            if (month) filters.month = month;
+            if (type) filters.type = type;
+            if (movement) filters.movement = movement;
+            if (keywords) filters.keywords = keywords;
 
-            editOldPredefinedTypeInput.value = itemToEdit.type;
-            editOldPredefinedMovementInput.value = itemToEdit.movement;
-            editPredefinedMovementSelect.value = itemToEdit.movement;
-            editPredefinedTypeInput.value = itemToEdit.type;
-            editPredefinedDescriptionInput.value = itemToEdit.description;
-            editPredefinedAmountInput.value = itemToEdit.suggestedAmount;
-
-            editPredefinedModal.classList.add('visible');
-        }
-
-        async function handleEditPredefinedSubmit(event) {
-            event.preventDefault();
-            const oldType = editOldPredefinedTypeInput.value;
-            const oldMovement = editOldPredefinedMovementInput.value;
-            const newType = editPredefinedTypeInput.value.trim();
-            const newMovement = editPredefinedMovementSelect.value;
-            const newDescription = editPredefinedDescriptionInput.value.trim();
-            const newAmount = parseFloat(editPredefinedAmountInput.value);
-
-            if (!oldType || !oldMovement || !newType || !newMovement || isNaN(newAmount)) {
-                alert('Por favor, rellena todos los campos obligatorios para actualizar el tipo predefinido.');
-                return;
-            }
-
-            const result = await fetchData('updatePredefined', 'POST', {
-                action: 'updatePredefined', oldType, oldMovement, newType, newMovement, newDescription, newAmount
-            });
-
-            if (result && result.status === 'success') {
-                alert('Tipo predefinido actualizado exitosamente.');
-                editPredefinedModal.classList.remove('visible');
-                await fetchDataAndRender();
+            const result = await fetchData('getFilteredTransactions', 'GET', filters);
+            if (result.status === 'success') {
+                displayTransactions(result.data);
+                updateDashboardCharts(result.data); // Actualiza los gráficos con los datos filtrados
             } else {
-                alert(result ? result.message : 'Error al actualizar el tipo predefinido.');
+                showToast(result.message, 'error');
             }
+        } catch (error) {
+            showToast('Error al aplicar filtros.', 'error');
         }
+    }
 
-        cancelEditPredefinedButton.onclick = () => {
-            editPredefinedModal.classList.remove('visible');
-        };
+    async function populateFilterOptions() {
+        try {
+            const result = await fetchData('getUniqueTransactionData', 'GET');
+            if (result.status === 'success') {
+                // Populate Year Filter
+                filterYearSelect.innerHTML = '<option value="">Todos los Años</option>';
+                result.years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    filterYearSelect.appendChild(option);
+                });
 
-        // --- Navegación por Pestañas ---
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).classList.add('active');
-
-            // Re-renderizar o actualizar solo lo necesario al cambiar de pestaña
-            if (tabId === 'dashboard') {
-                updateCharts();
-            } else if (tabId === 'transactionsSection') {
-                populateFilterYears(); // Asegura que los años de filtro estén actualizados
-                applyFilters();
-            } else if (tabId === 'predefinedTypesSection') {
-                renderPredefinedTypes();
-            } else if (tabId === 'addTransaction') {
-                populateTransactionTypeDropdowns();
-                // Asegurarse de que el autocompletado funcione si ya hay un movimiento seleccionado
-                if (transactionMovementSelect.value && transactionTypeSelect.value) {
-                    populateTransactionFieldsFromPredefined();
-                }
-            }
-        }
-
-        // --- Event Listeners Globales ---
-        document.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('loggedIn') === 'true') {
-                loginSection.style.display = 'none';
-                appSection.style.display = 'flex';
-                const storedUser = localStorage.getItem('currentUser');
-                if (storedUser) {
-                    showGreetingMessage(storedUser);
-                }
-                loadAppData(); // Carga todos los datos al iniciar sesión
+                // Populate Type Filter
+                filterTypeSelect.innerHTML = '<option value="">Todos los Tipos</option>';
+                result.types.sort().forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    filterTypeSelect.appendChild(option);
+                });
             } else {
-                loginSection.style.display = 'flex';
-                appSection.style.display = 'none';
+                showToast(result.message, 'error');
             }
-
-            loginForm.addEventListener('submit', handleLogin);
-            logoutButton.addEventListener('click', handleLogout);
-            transactionForm.addEventListener('submit', handleTransactionSubmit);
-            addPredefinedForm.addEventListener('submit', handleAddPredefinedType);
-            editTransactionForm.addEventListener('submit', handleEditTransactionSubmit);
-            editPredefinedForm.addEventListener('submit', handleEditPredefinedSubmit);
-
-            // Set today's date as default for transaction date input
-            transactionDateInput.value = new Date().toISOString().split('T')[0];
-
-            // Event listeners para autocompletar la transacción al seleccionar tipo/movimiento
-            transactionMovementSelect.addEventListener('change', populateTransactionFieldsFromPredefined);
-            transactionTypeSelect.addEventListener('change', populateTransactionFieldsFromPredefined);
+        } catch (error) {
+            showToast('Error al cargar opciones de filtro.', 'error');
+        }
+    }
 
 
-            // Event listeners para los filtros
-            filterYearSelect.addEventListener('change', applyFilters); // Nuevo
-            filterMonthSelect.addEventListener('change', applyFilters);
-            filterTypeSelect.addEventListener('change', applyFilters);
-            filterMovementSelect.addEventListener('change', applyFilters);
-            filterKeywordsInput.addEventListener('input', applyFilters); // Aplica el filtro mientras el usuario escribe
-            applyFiltersButton.addEventListener('click', applyFilters); // Botón de aplicar filtros
+    // Funciones del Dashboard
+    async function updateDashboard() {
+        // Obtener transacciones sin filtros (o aplicar filtros de dashboard si existen)
+        const currentYear = filterYearSelect.value || new Date().getFullYear().toString();
+        const currentMonth = filterMonthSelect.value; // Puede ser vacío para "Todos los meses"
+
+        try {
+            const result = await fetchData('getTransactionsForDashboard', 'GET', { year: currentYear, month: currentMonth });
+            if (result.status === 'success') {
+                updateDashboardCharts(result.data);
+                updateSummary(result.data);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            showToast('Error al actualizar el dashboard.', 'error');
+        }
+    }
+
+    function updateSummary(transactions) {
+        const totalIncome = transactions.filter(t => t.movement === 'Ingreso')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        const totalExpense = transactions.filter(t => t.movement === 'Gasto')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        const netBalance = totalIncome - totalExpense;
+
+        document.getElementById('total-income').textContent = totalIncome.toFixed(2);
+        document.getElementById('total-expense').textContent = totalExpense.toFixed(2);
+        document.getElementById('net-balance').textContent = netBalance.toFixed(2);
+
+        // Actualizar color del balance
+        const netBalanceElement = document.getElementById('net-balance');
+        netBalanceElement.classList.remove('text-success', 'text-danger');
+        if (netBalance >= 0) {
+            netBalanceElement.classList.add('text-success');
+        } else {
+            netBalanceElement.classList.add('text-danger');
+        }
+    }
+
+    function updateDashboardCharts(transactions) {
+        // Destruir el gráfico anterior si existe
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        const incomeByMonth = {};
+        const expenseByMonth = {};
+        const categories = {}; // Para gastos por categoría
+
+        transactions.forEach(t => {
+            const date = dateFns.parse(t.date, 'YYYY-MM-DD', new Date());
+            const month = dateFns.format(date, 'MMM'); // 'Jan', 'Feb', etc.
+
+            if (t.movement === 'Ingreso') {
+                incomeByMonth[month] = (incomeByMonth[month] || 0) + parseFloat(t.amount);
+            } else if (t.movement === 'Gasto') {
+                expenseByMonth[month] = (expenseByMonth[month] || 0) + parseFloat(t.amount);
+                categories[t.type] = (categories[t.type] || 0) + parseFloat(t.amount);
+            }
         });
+
+        const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const incomeData = labels.map(month => incomeByMonth[month] || 0);
+        const expenseData = labels.map(month => expenseByMonth[month] || 0);
+
+        // Chart 1: Ingresos vs. Gastos por Mes
+        const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
+        currentChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ingresos',
+                    data: incomeData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Gastos',
+                    data: expenseData,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Gastos por Categoría (Dona)
+        const ctx2 = document.getElementById('expensesByCategoryChart').getContext('2d');
+        if (window.expensesByCategoryChart) {
+            window.expensesByCategoryChart.destroy(); // Destruir instancia anterior
+        }
+        window.expensesByCategoryChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categories),
+                datasets: [{
+                    data: Object.values(categories),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)', // Rojo
+                        'rgba(54, 162, 235, 0.8)', // Azul
+                        'rgba(255, 206, 86, 0.8)', // Amarillo
+                        'rgba(75, 192, 192, 0.8)', // Verde agua
+                        'rgba(153, 102, 255, 0.8)', // Morado
+                        'rgba(255, 159, 64, 0.8)', // Naranja
+                        'rgba(199, 199, 199, 0.8)' // Gris
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed) {
+                                    label += new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Inicialización al cargar el DOM
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Si el usuario está logeado, mostrar dashboard, si no, mostrar login
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            showDashboard();
+            await Promise.all([
+                fetchTransactions(),
+                fetchPredefinedTypes(),
+                populateFilterOptions(),
+                updateDashboard() // Carga inicial del dashboard
+            ]);
+        } else {
+            showLogin();
+        }
+
+        // Event listeners principales
+        loginForm.addEventListener('submit', handleLogin);
+        logoutButton.addEventListener('click', handleLogout);
+        transactionForm.addEventListener('submit', handleTransactionSubmit);
+        addPredefinedForm.addEventListener('submit', handleAddPredefinedType);
+        editTransactionForm.addEventListener('submit', handleEditTransactionSubmit);
+        editPredefinedForm.addEventListener('submit', handleEditPredefinedSubmit);
+
+        // Set today's date as default for transaction date input
+        transactionDateInput.value = new Date().toISOString().split('T')[0];
+
+        // Event listeners para autocompletar la transacción al seleccionar tipo/movimiento
+        transactionMovementSelect.addEventListener('change', populateTransactionFieldsFromPredefined);
+        transactionTypeSelect.addEventListener('change', populateTransactionFieldsFromPredefined);
+
+
+        // Event listeners para los filtros
+        filterYearSelect.addEventListener('change', applyFilters); // Nuevo
+        filterMonthSelect.addEventListener('change', applyFilters);
+        filterTypeSelect.addEventListener('change', applyFilters);
+        filterMovementSelect.addEventListener('change', applyFilters);
+        filterKeywordsInput.addEventListener('input', applyFilters); // Aplica el filtro mientras el usuario escribe
+        applyFiltersButton.addEventListener('click', applyFilters); // Botón de aplicar filtros
+    });
+
     </script>
 </body>
 </html>
