@@ -1241,7 +1241,859 @@ h3 { font-size: var(--font-size-xl); }
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script src="script.js"></script>
+    <script>
+        // Registrar el plugin datalabels globalmente
+        Chart.register(ChartDataLabels);
+
+        // --- Constantes y Elementos del DOM ---
+        // ¡IMPORTANTE! Reemplaza esta URL con la de tu Web App de Google Apps Script DESPUÉS DE DESPLEGARLA
+        // La URL debe terminar en /exec
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbymBcf4ut-aL3DJshdpiO5t3UEEJiIT8PmWVPYqSIl_-nW8PST_BoZVmHVV2vlZsBM36w/exec';
+
+        // Secciones principales
+        const loginSection = document.getElementById('login-section');
+        const appSection = document.getElementById('app-section');
+        const loadingOverlay = document.getElementById('loading-overlay'); // Loader
+
+        // Formularios y botones de login
+        const loginForm = document.getElementById('login-form');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const logoutButton = document.getElementById('logout-button');
+
+        // Elementos del Dashboard
+        const dashboardMonthSelect = document.getElementById('dashboard-month-select');
+        const dashboardYearSelect = document.getElementById('dashboard-year-select');
+        const dashboardPeriodSpan = document.getElementById('dashboard-period');
+        const cardIncomeTitle = document.getElementById('card-income-title');
+        const cardExpenseTitle = document.getElementById('card-expense-title');
+        const cardBalanceTitle = document.getElementById('card-balance-title');
+        const totalIncomeMonth = document.getElementById('total-income-month');
+        const totalExpenseMonth = document.getElementById('total-expense-month');
+        const balanceMonth = document.getElementById('balance-month');
+        const incomeExpenseChartCanvas = document.getElementById('income-expense-chart');
+        const expenseCategoryChartCanvas = document.getElementById('expense-category-chart');
+
+        let incomeExpenseChart;
+        let expenseCategoryChart;
+
+        // Elementos de Navegación
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Elementos de Transacciones
+        const addTransactionButtonTable = document.getElementById('add-transaction-button-table');
+        const transactionsTableBody = document.getElementById('transactions-table-body');
+        const noTransactionsMessage = document.getElementById('no-transactions-message');
+        const filterMonthSelect = document.getElementById('filter-month-select');
+        const filterTypeSelect = document.getElementById('filter-type-select');
+        const filterMovementSelect = document.getElementById('filter-movement-select');
+        const filterKeywordsInput = document.getElementById('filter-keywords-input');
+        const applyFiltersButton = document.getElementById('apply-filters-button');
+
+        // Elementos de Añadir Transacción
+        const addTransactionForm = document.getElementById('add-transaction-form');
+        const transactionDateInput = document.getElementById('transaction-date');
+        const transactionMovementSelect = document.getElementById('transaction-movement');
+        const transactionTypeSelect = document.getElementById('transaction-type');
+        const transactionDescriptionInput = document.getElementById('transaction-description');
+        const transactionAmountInput = document.getElementById('transaction-amount');
+
+        // Elementos de Tipos Predefinidos
+        const predefinedTypesTableBody = document.getElementById('predefined-types-table-body');
+        const noPredefinedTypesMessage = document.getElementById('no-predefined-types-message');
+        const addPredefinedButton = document.getElementById('add-predefined-button');
+
+        // Modales
+        const editTransactionModal = document.getElementById('edit-transaction-modal');
+        const editTransactionForm = document.getElementById('edit-transaction-form');
+        const addPredefinedModal = document.getElementById('add-predefined-modal');
+        const addPredefinedForm = document.getElementById('add-predefined-form');
+        const editPredefinedModal = document.getElementById('edit-predefined-modal');
+        const editPredefinedForm = document.getElementById('edit-predefined-form');
+
+        // Elementos del Toast
+        const toastContainer = document.getElementById('toast-container');
+
+        // Variables para almacenar datos (cache)
+        let allTransactions = [];
+        let allPredefinedTypes = [];
+        let currentFilters = {
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+            type: '',
+            movement: '',
+            keywords: ''
+        };
+
+        // --- Funciones de Utilidad ---
+
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.classList.add('toast-message', type);
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            // Trigger reflow to enable transition
+            void toast.offsetWidth; 
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 1); // Fix for timezone offset
+            return date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(amount);
+        }
+
+        function openModal(modalElement) {
+            modalElement.classList.add('is-visible');
+        }
+
+        function closeModal(modalElement) {
+            modalElement.classList.remove('is-visible');
+        }
+
+        // --- Manejo de Pestañas ---
+
+        function activateTab(tabName) {
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === tabName) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+
+            // Acciones específicas al cambiar de pestaña
+            if (tabName === 'dashboard') {
+                updateDashboard();
+            } else if (tabName === 'transactions') {
+                loadTransactions();
+            } else if (tabName === 'predefined-types') {
+                loadPredefinedTypes();
+            } else if (tabName === 'add-transaction') {
+                loadPredefinedTypesForTransactionForm();
+            }
+        }
+
+        // --- Comunicación con Google Apps Script ---
+
+        async function fetchData(action, params = {}) {
+            showLoading();
+            try {
+                const queryParams = new URLSearchParams({ action, ...params }).toString();
+                const response = await fetch(`${WEB_APP_URL}?${queryParams}`);
+                const data = await response.json();
+                if (data.status === 'error') {
+                    showToast(data.message, 'error');
+                    console.error('Backend error:', data.message);
+                }
+                return data;
+            } catch (error) {
+                showToast('Error de conexión con el servidor.', 'error');
+                console.error('Fetch error:', error);
+                return { status: 'error', message: `Client-side fetch error: ${error.message}` };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function postData(action, payload = {}) {
+            showLoading();
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'cors', // Asegúrate de que CORS esté habilitado en el lado de Apps Script
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ action, data: JSON.stringify(payload) }).toString(),
+                });
+                const data = await response.json();
+                if (data.status === 'error') {
+                    showToast(data.message, 'error');
+                    console.error('Backend error:', data.message);
+                }
+                return data;
+            } catch (error) {
+                showToast('Error de conexión con el servidor.', 'error');
+                console.error('Post error:', error);
+                return { status: 'error', message: `Client-side post error: ${error.message}` };
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- Autenticación ---
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            const result = await postData('login', { username, password });
+
+            if (result.status === 'success') {
+                showToast('Inicio de sesión exitoso.', 'success');
+                loginSection.style.display = 'none';
+                appSection.style.display = 'flex';
+                feather.replace(); // Initialize feather icons
+                initializeDashboardFilters();
+                updateDashboard();
+                loadPredefinedTypesForTransactionForm(); // Load types initially
+            } else {
+                showToast('Credenciales incorrectas.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            // En una aplicación real, aquí limpiarías tokens/sesiones
+            showToast('Sesión cerrada.', 'info');
+            appSection.style.display = 'none';
+            loginSection.style.display = 'flex';
+            usernameInput.value = '';
+            passwordInput.value = '';
+        }
+
+        // --- Dashboard ---
+
+        function initializeDashboardFilters() {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1;
+
+            // Populate year select
+            dashboardYearSelect.innerHTML = '';
+            for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                if (i === currentYear) {
+                    option.selected = true;
+                }
+                dashboardYearSelect.appendChild(option);
+            }
+
+            // Set current month
+            dashboardMonthSelect.value = currentMonth;
+        }
+
+        async function updateDashboard() {
+            const month = dashboardMonthSelect.value;
+            const year = dashboardYearSelect.value;
+            currentFilters.month = parseInt(month); // Update global filter state
+            currentFilters.year = parseInt(year);
+
+            const monthName = new Date(year, month - 1, 1).toLocaleDateString('es-ES', { month: 'long' });
+            dashboardPeriodSpan.textContent = `(${monthName} de ${year})`;
+
+            const data = await fetchData('getDashboardData', { month, year });
+
+            if (data.status === 'success') {
+                totalIncomeMonth.textContent = formatCurrency(data.totalIncome);
+                totalExpenseMonth.textContent = formatCurrency(data.totalExpense);
+                balanceMonth.textContent = formatCurrency(data.balance);
+
+                // Update chart titles for consistency (optional, but good UX)
+                cardIncomeTitle.textContent = `Total Ingresos (${monthName})`;
+                cardExpenseTitle.textContent = `Total Gastos (${monthName})`;
+                cardBalanceTitle.textContent = `Balance (${monthName})`;
+
+                renderIncomeExpenseChart(data.totalIncome, data.totalExpense);
+                renderExpenseCategoryChart(data.expenseByCategory);
+            }
+        }
+
+        function renderIncomeExpenseChart(income, expense) {
+            const ctx = incomeExpenseChartCanvas.getContext('2d');
+            if (incomeExpenseChart) {
+                incomeExpenseChart.destroy();
+            }
+            incomeExpenseChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ingresos', 'Gastos'],
+                    datasets: [{
+                        data: [income, expense],
+                        backgroundColor: [
+                            'var(--color-accent-500)', // Income
+                            'var(--color-error)'       // Expense
+                        ],
+                        borderColor: [
+                            'var(--color-accent-600)',
+                            '#a71d2a'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.raw);
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return formatCurrency(value);
+                            },
+                            color: 'var(--color-neutral-800)',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderExpenseCategoryChart(expenseByCategory) {
+            const ctx = expenseCategoryChartCanvas.getContext('2d');
+            if (expenseCategoryChart) {
+                expenseCategoryChart.destroy();
+            }
+
+            const labels = expenseByCategory.map(item => item.type);
+            const data = expenseByCategory.map(item => item.total);
+            const backgroundColors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+                '#E7E9ED', '#8B008B', '#228B22', '#FFDAB9'
+            ]; // More colors as needed
+
+            expenseCategoryChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatCurrency(context.raw);
+                                    return label;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            formatter: (value, context) => {
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                                return percentage;
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Transacciones ---
+
+        async function loadTransactions() {
+            const data = await fetchData('getTransactions');
+            if (data.status === 'success') {
+                allTransactions = data.transactions;
+                populateFilterMonths();
+                applyFilters(); // Apply initial filters based on currentFilters state
+            }
+        }
+
+        function populateFilterMonths() {
+            // Populate month filter based on available transaction dates
+            const years = new Set(allTransactions.map(t => new Date(t.Fecha).getFullYear()));
+            const months = new Set();
+            allTransactions.forEach(t => {
+                const date = new Date(t.Fecha);
+                months.add(`${date.getFullYear()}-${date.getMonth() + 1}`);
+            });
+
+            // Clear existing options, but keep "Todos"
+            filterMonthSelect.innerHTML = '<option value="">Todos</option>';
+            // Sort months to display chronologically
+            const sortedMonths = Array.from(months).sort((a, b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                if (yearA !== yearB) return yearA - yearB;
+                return monthA - monthB;
+            });
+
+            sortedMonths.forEach(monthYear => {
+                const [year, month] = monthYear.split('-');
+                const date = new Date(year, month - 1, 1);
+                const option = document.createElement('option');
+                option.value = monthYear; // e.g., "2023-1"
+                option.textContent = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                filterMonthSelect.appendChild(option);
+            });
+            filterMonthSelect.value = `${currentFilters.year}-${currentFilters.month}`; // Set current dashboard month/year
+        }
+
+        function applyFilters() {
+            const selectedMonthYear = filterMonthSelect.value;
+            const selectedType = filterTypeSelect.value;
+            const selectedMovement = filterMovementSelect.value;
+            const keywords = filterKeywordsInput.value.toLowerCase();
+
+            // Update currentFilters
+            currentFilters.type = selectedType;
+            currentFilters.movement = selectedMovement;
+            currentFilters.keywords = keywords;
+
+            if (selectedMonthYear) {
+                const [year, month] = selectedMonthYear.split('-').map(Number);
+                currentFilters.month = month;
+                currentFilters.year = year;
+            } else {
+                currentFilters.month = '';
+                currentFilters.year = '';
+            }
+
+            const filteredTransactions = allTransactions.filter(transaction => {
+                const transactionDate = new Date(transaction.Fecha);
+                const matchMonth = !currentFilters.month || 
+                                   (transactionDate.getMonth() + 1 === currentFilters.month && 
+                                    transactionDate.getFullYear() === currentFilters.year);
+                const matchType = !selectedType || transaction.Tipo === selectedType;
+                const matchMovement = !selectedMovement || transaction.Movimiento === selectedMovement;
+                const matchKeywords = !keywords || 
+                                    transaction.Descripcion.toLowerCase().includes(keywords) ||
+                                    transaction.Monto.toString().includes(keywords);
+                return matchMonth && matchType && matchMovement && matchKeywords;
+            });
+
+            renderTransactionsTable(filteredTransactions);
+        }
+
+        function renderTransactionsTable(transactions) {
+            transactionsTableBody.innerHTML = '';
+            if (transactions.length === 0) {
+                noTransactionsMessage.style.display = 'block';
+                return;
+            }
+            noTransactionsMessage.style.display = 'none';
+
+            transactions.forEach(transaction => {
+                const row = transactionsTableBody.insertRow();
+                row.insertCell().textContent = formatDate(transaction.Fecha);
+                const movementCell = row.insertCell();
+                movementCell.innerHTML = `<span class="status-badge ${transaction.Movimiento === 'Ingreso' ? 'income' : 'expense'}">${transaction.Movimiento}</span>`;
+                row.insertCell().textContent = transaction.Tipo;
+                row.insertCell().textContent = transaction.Descripcion;
+                const amountCell = row.insertCell();
+                amountCell.textContent = formatCurrency(transaction.Monto);
+                amountCell.classList.add(transaction.Movimiento === 'Ingreso' ? 'text-income' : 'text-expense');
+
+                const actionsCell = row.insertCell();
+                actionsCell.classList.add('table-actions');
+                
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i data-feather="edit-2"></i>';
+                editButton.classList.add('btn', 'btn-secondary', 'btn-icon', 'btn-icon-sm');
+                editButton.title = 'Editar';
+                editButton.addEventListener('click', () => openEditTransactionModal(transaction));
+                actionsCell.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i data-feather="trash-2"></i>';
+                deleteButton.classList.add('btn', 'btn-danger', 'btn-icon', 'btn-icon-sm');
+                deleteButton.title = 'Eliminar';
+                deleteButton.addEventListener('click', () => deleteTransaction(transaction.ID));
+                actionsCell.appendChild(deleteButton);
+            });
+            feather.replace(); // Re-initialize feather icons for new buttons
+        }
+
+        async function handleAddTransaction(event) {
+            event.preventDefault();
+            const newTransaction = {
+                Fecha: transactionDateInput.value,
+                Movimiento: transactionMovementSelect.value,
+                Tipo: transactionTypeSelect.value,
+                Descripcion: transactionDescriptionInput.value,
+                Monto: parseFloat(transactionAmountInput.value)
+            };
+
+            const result = await postData('addTransaction', newTransaction);
+
+            if (result.status === 'success') {
+                showToast('Transacción añadida exitosamente.', 'success');
+                addTransactionForm.reset();
+                transactionDateInput.value = new Date().toISOString().split('T')[0]; // Reset date to today
+                allTransactions.push(result.transaction); // Add new transaction to cache
+                applyFilters(); // Re-render table
+                updateDashboard(); // Update dashboard with new data
+                loadPredefinedTypesForTransactionForm(); // Refresh types for new transaction
+                activateTab('transactions'); // Switch to transactions tab
+            }
+        }
+
+        function openEditTransactionModal(transaction) {
+            document.getElementById('edit-transaction-id').value = transaction.ID;
+            document.getElementById('edit-transaction-date').value = transaction.Fecha; // Date format should be YYYY-MM-DD
+            document.getElementById('edit-transaction-movement').value = transaction.Movimiento;
+            document.getElementById('edit-transaction-type').value = transaction.Tipo;
+            document.getElementById('edit-transaction-description').value = transaction.Descripcion;
+            document.getElementById('edit-transaction-amount').value = transaction.Monto;
+            openModal(editTransactionModal);
+        }
+
+        async function handleEditTransactionSubmit(event) {
+            event.preventDefault();
+            const updatedTransaction = {
+                ID: document.getElementById('edit-transaction-id').value,
+                Fecha: document.getElementById('edit-transaction-date').value,
+                Movimiento: document.getElementById('edit-transaction-movement').value,
+                Tipo: document.getElementById('edit-transaction-type').value,
+                Descripcion: document.getElementById('edit-transaction-description').value,
+                Monto: parseFloat(document.getElementById('edit-transaction-amount').value)
+            };
+
+            const result = await postData('updateTransaction', updatedTransaction);
+
+            if (result.status === 'success') {
+                showToast('Transacción actualizada exitosamente.', 'success');
+                closeModal(editTransactionModal);
+                // Update cache
+                const index = allTransactions.findIndex(t => t.ID === updatedTransaction.ID);
+                if (index !== -1) {
+                    allTransactions[index] = { ...allTransactions[index], ...updatedTransaction };
+                }
+                applyFilters(); // Re-render table
+                updateDashboard(); // Update dashboard
+            }
+        }
+
+        async function deleteTransaction(id) {
+            if (!confirm('¿Está seguro de que desea eliminar esta transacción?')) {
+                return;
+            }
+            const result = await postData('deleteTransaction', { id });
+            if (result.status === 'success') {
+                showToast('Transacción eliminada exitosamente.', 'success');
+                allTransactions = allTransactions.filter(t => t.ID !== id); // Remove from cache
+                applyFilters(); // Re-render table
+                updateDashboard(); // Update dashboard
+            }
+        }
+
+        // --- Tipos Predefinidos ---
+
+        async function loadPredefinedTypes() {
+            const data = await fetchData('getPredefinedTypes');
+            if (data.status === 'success') {
+                allPredefinedTypes = data.predefinedTypes;
+                renderPredefinedTypesTable(allPredefinedTypes);
+                // Also update the filter type select options
+                populateFilterTypes(allPredefinedTypes);
+            }
+        }
+
+        function renderPredefinedTypesTable(predefinedTypes) {
+            predefinedTypesTableBody.innerHTML = '';
+            if (predefinedTypes.length === 0) {
+                noPredefinedTypesMessage.style.display = 'block';
+                return;
+            }
+            noPredefinedTypesMessage.style.display = 'none';
+
+            predefinedTypes.forEach(type => {
+                const row = predefinedTypesTableBody.insertRow();
+                row.insertCell().textContent = type.Movimiento;
+                row.insertCell().textContent = type.Tipo;
+                row.insertCell().textContent = type.DescripcionSugerida || '-';
+                row.insertCell().textContent = formatCurrency(type.MontoSugerido || 0);
+
+                const actionsCell = row.insertCell();
+                actionsCell.classList.add('table-actions');
+
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i data-feather="edit-2"></i>';
+                editButton.classList.add('btn', 'btn-secondary', 'btn-icon', 'btn-icon-sm');
+                editButton.title = 'Editar';
+                editButton.addEventListener('click', () => openEditPredefinedModal(type));
+                actionsCell.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i data-feather="trash-2"></i>';
+                deleteButton.classList.add('btn', 'btn-danger', 'btn-icon', 'btn-icon-sm');
+                deleteButton.title = 'Eliminar';
+                deleteButton.addEventListener('click', () => deletePredefinedType(type.Tipo, type.Movimiento));
+                actionsCell.appendChild(deleteButton);
+            });
+            feather.replace();
+        }
+
+        function populateFilterTypes(predefinedTypes) {
+            filterTypeSelect.innerHTML = '<option value="">Todos</option>'; // Keep "Todos"
+            const uniqueTypes = [...new Set(predefinedTypes.map(t => t.Tipo))];
+            uniqueTypes.sort().forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                filterTypeSelect.appendChild(option);
+            });
+            filterTypeSelect.value = currentFilters.type; // Restore previously selected filter
+        }
+
+        async function loadPredefinedTypesForTransactionForm() {
+            const data = await fetchData('getPredefinedTypes');
+            if (data.status === 'success') {
+                allPredefinedTypes = data.predefinedTypes; // Update cache
+                updateTransactionTypeSelect();
+            }
+        }
+
+        function updateTransactionTypeSelect() {
+            const selectedMovement = transactionMovementSelect.value;
+            transactionTypeSelect.innerHTML = '<option value="">Seleccione...</option>';
+            if (selectedMovement) {
+                const filteredTypes = allPredefinedTypes.filter(type => type.Movimiento === selectedMovement);
+                filteredTypes.sort((a, b) => a.Tipo.localeCompare(b.Tipo)).forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.Tipo;
+                    option.textContent = type.Tipo;
+                    transactionTypeSelect.appendChild(option);
+                });
+            } else {
+                transactionTypeSelect.innerHTML = '<option value="">Seleccione movimiento primero...</option>';
+            }
+            transactionTypeSelect.value = ''; // Reset selected type
+            transactionDescriptionInput.value = ''; // Clear description
+            transactionAmountInput.value = ''; // Clear amount
+        }
+
+        function autoFillTransactionFields() {
+            const selectedMovement = transactionMovementSelect.value;
+            const selectedType = transactionTypeSelect.value;
+
+            if (selectedMovement && selectedType) {
+                const predefined = allPredefinedTypes.find(
+                    p => p.Movimiento === selectedMovement && p.Tipo === selectedType
+                );
+                if (predefined) {
+                    transactionDescriptionInput.value = predefined.DescripcionSugerida || '';
+                    transactionAmountInput.value = predefined.MontoSugerido || '';
+                } else {
+                    transactionDescriptionInput.value = '';
+                    transactionAmountInput.value = '';
+                }
+            } else {
+                transactionDescriptionInput.value = '';
+                transactionAmountInput.value = '';
+            }
+        }
+
+
+        async function handleAddPredefinedType(event) {
+            event.preventDefault();
+            const newPredefined = {
+                Movimiento: document.getElementById('add-predefined-movement').value,
+                Tipo: document.getElementById('add-predefined-type').value,
+                DescripcionSugerida: document.getElementById('add-predefined-description').value,
+                MontoSugerido: parseFloat(document.getElementById('add-predefined-amount').value) || 0
+            };
+
+            const result = await postData('addPredefined', newPredefined);
+
+            if (result.status === 'success') {
+                showToast('Tipo predefinido añadido exitosamente.', 'success');
+                closeModal(addPredefinedModal);
+                addPredefinedForm.reset();
+                allPredefinedTypes.push(newPredefined); // Add to cache
+                loadPredefinedTypes(); // Re-render table and update filters
+                loadPredefinedTypesForTransactionForm(); // Update transaction form types
+            }
+        }
+
+        function openEditPredefinedModal(predefined) {
+            document.getElementById('edit-predefined-original-type').value = predefined.Tipo;
+            document.getElementById('edit-predefined-original-movement').value = predefined.Movimiento;
+            document.getElementById('edit-predefined-movement').value = predefined.Movimiento;
+            document.getElementById('edit-predefined-type').value = predefined.Tipo;
+            document.getElementById('edit-predefined-description').value = predefined.DescripcionSugerida || '';
+            document.getElementById('edit-predefined-amount').value = predefined.MontoSugerido || '';
+            openModal(editPredefinedModal);
+        }
+
+        async function handleEditPredefinedSubmit(event) {
+            event.preventDefault();
+            const updatedPredefined = {
+                originalType: document.getElementById('edit-predefined-original-type').value,
+                originalMovement: document.getElementById('edit-predefined-original-movement').value,
+                newMovement: document.getElementById('edit-predefined-movement').value,
+                newType: document.getElementById('edit-predefined-type').value,
+                newDescription: document.getElementById('edit-predefined-description').value,
+                newAmount: parseFloat(document.getElementById('edit-predefined-amount').value) || 0
+            };
+
+            const result = await postData('updatePredefined', updatedPredefined);
+
+            if (result.status === 'success') {
+                showToast('Tipo predefinido actualizado exitosamente.', 'success');
+                closeModal(editPredefinedModal);
+                // Update cache
+                const index = allPredefinedTypes.findIndex(
+                    p => p.Tipo === updatedPredefined.originalType && p.Movimiento === updatedPredefined.originalMovement
+                );
+                if (index !== -1) {
+                    allPredefinedTypes[index] = {
+                        Movimiento: updatedPredefined.newMovement,
+                        Tipo: updatedPredefined.newType,
+                        DescripcionSugerida: updatedPredefined.newDescription,
+                        MontoSugerido: updatedPredefined.newAmount
+                    };
+                }
+                loadPredefinedTypes(); // Re-render table and update filters
+                loadPredefinedTypesForTransactionForm(); // Update transaction form types
+            }
+        }
+
+        async function deletePredefinedType(type, movement) {
+            if (!confirm(`¿Está seguro de que desea eliminar el tipo predefinido "${type}" (${movement})?`)) {
+                return;
+            }
+            const result = await postData('deletePredefined', { type, movement });
+            if (result.status === 'success') {
+                showToast('Tipo predefinido eliminado exitosamente.', 'success');
+                allPredefinedTypes = allPredefinedTypes.filter(
+                    p => !(p.Tipo === type && p.Movimiento === movement)
+                ); // Remove from cache
+                loadPredefinedTypes(); // Re-render table and update filters
+                loadPredefinedTypesForTransactionForm(); // Update transaction form types
+            }
+        }
+
+
+        // --- Inicialización y Event Listeners ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace(); // Initialize feather icons on page load
+
+            // Event listeners para autenticación
+            loginForm.addEventListener('submit', handleLogin);
+            logoutButton.addEventListener('click', handleLogout);
+
+            // Event listeners para pestañas
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    activateTab(button.dataset.tab);
+                });
+            });
+
+            // Event listeners para modales
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal(overlay);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.modal-close-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const modalTargetId = e.currentTarget.dataset.modalTarget;
+                    const modalElement = document.getElementById(modalTargetId);
+                    if (modalElement) {
+                        closeModal(modalElement);
+                    }
+                });
+            });
+
+            // Specific form submissions and button clicks
+            addTransactionForm.addEventListener('submit', handleAddTransaction);
+            addTransactionButtonTable.addEventListener('click', () => activateTab('add-transaction')); // Go to add transaction tab
+            addPredefinedButton.addEventListener('click', openAddPredefinedModal); // Botón para abrir modal "Añadir Tipo"
+            addPredefinedForm.addEventListener('submit', handleAddPredefinedType); // Formulario dentro del modal
+            editTransactionForm.addEventListener('submit', handleEditTransactionSubmit);
+            editPredefinedForm.addEventListener('submit', handleEditPredefinedSubmit);
+
+            // Event listeners para auto-rellenado de transacción
+            transactionMovementSelect.addEventListener('change', updateTransactionTypeSelect); // Update types when movement changes
+            transactionTypeSelect.addEventListener('change', autoFillTransactionFields);
+
+            // Set today's date as default for transaction date input
+            transactionDateInput.value = new Date().toISOString().split('T')[0];
+
+            // Event listeners para los filtros de transacciones
+            applyFiltersButton.addEventListener('click', applyFilters);
+            filterMonthSelect.addEventListener('change', applyFilters);
+            filterTypeSelect.addEventListener('change', applyFilters);
+            filterMovementSelect.addEventListener('change', applyFilters);
+            filterKeywordsInput.addEventListener('input', applyFilters); // Aplica el filtro mientras el usuario escribe
+
+            // Event listeners para controles del dashboard
+            dashboardMonthSelect.addEventListener('change', updateDashboard);
+            dashboardYearSelect.addEventListener('change', updateDashboard);
+        });
+    </script>
     <script src="https://unpkg.com/feather-icons"></script>
 </body>
 </html>
