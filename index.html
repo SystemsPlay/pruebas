@@ -787,69 +787,55 @@ h3 { font-size: var(--font-size-xl); }
     body {
         padding: var(--spacing-md);
     }
-
     .main-wrapper {
         padding: var(--spacing-lg);
         gap: var(--spacing-md);
     }
-
     .app-header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-sm);
     }
-
     .app-header h1 {
         font-size: var(--font-size-2xl);
     }
-
     .nav-tabs {
         flex-direction: column;
         gap: var(--spacing-xs);
     }
-
     .tab-button {
         width: 100%;
         text-align: left;
     }
-
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-sm);
     }
-
     .section-header h2 {
         font-size: var(--font-size-xl);
     }
-
     .stat-cards-grid {
         grid-template-columns: 1fr;
     }
-
     .filters-container {
         flex-direction: column;
         align-items: stretch;
     }
-
     .filters-container .form-group {
         min-width: unset;
         width: 100%;
     }
-    
     .filters-container button {
         width: 100%;
     }
-
     .data-table th, .data-table td {
         padding: var(--spacing-sm);
         font-size: var(--font-size-sm);
     }
-
     .modal-content {
         padding: var(--spacing-lg);
     }
-
     .modal-header h2 {
         font-size: var(--font-size-xl);
     }
@@ -857,23 +843,14 @@ h3 { font-size: var(--font-size-xl); }
 
 /* Print Styles */
 @media print {
-    .app-header,
-    .nav-tabs,
-    .filters-container,
-    .modal-overlay,
-    .toast-container,
-    .loading-overlay {
+    .app-header, .nav-tabs, .filters-container, .modal-overlay, .toast-container, .loading-overlay {
         display: none !important;
     }
-    
     .main-wrapper {
         box-shadow: none;
         border: none;
     }
-    
-    .stat-card,
-    .chart-card,
-    .table-container {
+    .stat-card, .chart-card, .table-container {
         break-inside: avoid;
         box-shadow: none;
         border: 1px solid var(--color-neutral-300);
@@ -891,7 +868,6 @@ h3 { font-size: var(--font-size-xl); }
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
     }
-
     .btn-primary {
         background-color: var(--color-primary-500);
         border-color: var(--color-primary-500);
@@ -900,7 +876,6 @@ h3 { font-size: var(--font-size-xl); }
         background-color: var(--color-primary-500);
         filter: brightness(1.2);
     }
-
     .btn-outline {
         border-color: var(--color-primary-500);
         color: var(--color-primary-500);
@@ -909,15 +884,11 @@ h3 { font-size: var(--font-size-xl); }
         background-color: var(--color-primary-500);
         color: white;
     }
-
     .tab-button.active {
         border-bottom-color: var(--color-primary-500);
         color: var(--color-primary-500);
     }
-
-    .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
         border-color: var(--color-primary-500);
         box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.4);
     }
@@ -1006,26 +977,23 @@ h3 { font-size: var(--font-size-xl); }
                         <p id="total-income-month">$0.00</p>
                     </div>
                     <div class="stat-card">
-                        <h3 id="card-expense-title">Total Egresos</h3>
+                        <h3 id="card-expense-title">Total Gastos</h3>
                         <p id="total-expense-month">$0.00</p>
                     </div>
                     <div class="stat-card">
-                        <h3>Saldo Actual</h3>
-                        <p id="current-balance">$0.00</p>
+                        <h3 id="card-balance-title">Balance</h3>
+                        <p id="balance-month">$0.00</p>
                     </div>
                 </div>
+
                 <div class="chart-grid">
                     <div class="chart-card">
-                        <h3>Ingresos vs Egresos por Mes</h3>
-                        <canvas id="financial-chart" class="chart-canvas"></canvas>
+                        <h3>Ingresos vs Gastos</h3>
+                        <canvas id="income-expense-chart" class="chart-canvas"></canvas>
                     </div>
                     <div class="chart-card">
-                        <h3>Ingresos por Tipo <span id="income-type-period"></span></h3>
-                        <canvas id="income-by-type-chart" class="chart-canvas"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Egresos por Tipo <span id="expense-type-period"></span></h3>
-                        <canvas id="expense-by-type-chart" class="chart-canvas"></canvas>
+                        <h3>Gastos por Categoría</h3>
+                        <canvas id="expense-category-chart" class="chart-canvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -1033,46 +1001,35 @@ h3 { font-size: var(--font-size-xl); }
             <div id="transactions-tab" class="tab-content">
                 <div class="section-header">
                     <h2>Historial de Movimientos</h2>
+                    <button class="btn btn-primary" id="add-transaction-button-table">
+                        <i data-feather="plus"></i> Añadir Transacción
+                    </button>
                 </div>
-
+                
                 <div class="filters-container">
                     <div class="form-group">
-                        <label for="filter-month" class="form-label">Filtrar por Mes:</label>
-                        <select id="filter-month" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="1">Enero</option>
-                            <option value="2">Febrero</option>
-                            <option value="3">Marzo</option>
-                            <option value="4">Abril</option>
-                            <option value="5">Mayo</option>
-                            <option value="6">Junio</option>
-                            <option value="7">Julio</option>
-                            <option value="8">Agosto</option>
-                            <option value="9">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
-                        </select>
+                        <label for="filter-month-select" class="form-label">Mes:</label>
+                        <select id="filter-month-select" class="form-select"></select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-type" class="form-label">Filtrar por Tipo:</label>
-                        <select id="filter-type" class="form-select">
+                        <label for="filter-type-select" class="form-label">Tipo:</label>
+                        <select id="filter-type-select" class="form-select">
                             <option value="">Todos</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-movement" class="form-label">Filtrar por Movimiento:</label>
-                        <select id="filter-movement" class="form-select">
+                        <label for="filter-movement-select" class="form-label">Movimiento:</label>
+                        <select id="filter-movement-select" class="form-select">
                             <option value="">Todos</option>
                             <option value="Ingreso">Ingreso</option>
-                            <option value="Egreso">Egreso</option>
+                            <option value="Gasto">Gasto</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="filter-keywords" class="form-label">Buscar:</label>
-                        <input type="text" id="filter-keywords" class="form-input" placeholder="Descripción, ID...">
+                        <label for="filter-keywords-input" class="form-label">Buscar:</label>
+                        <input type="text" id="filter-keywords-input" class="form-input" placeholder="Descripción o Monto">
                     </div>
-                    <button id="apply-filters-button" class="btn btn-primary">
+                    <button class="btn btn-secondary" id="apply-filters-button">
                         <i data-feather="filter"></i> Aplicar Filtros
                     </button>
                 </div>
@@ -1081,7 +1038,6 @@ h3 { font-size: var(--font-size-xl); }
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Fecha</th>
                                 <th>Movimiento</th>
                                 <th>Tipo</th>
@@ -1090,17 +1046,20 @@ h3 { font-size: var(--font-size-xl); }
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="transactions-list">
+                        <tbody id="transactions-table-body">
                             </tbody>
                     </table>
+                </div>
+                <div id="no-transactions-message" class="text-center my-md" style="display: none;">
+                    No hay transacciones para mostrar con los filtros aplicados.
                 </div>
             </div>
 
             <div id="add-transaction-tab" class="tab-content">
                 <div class="section-header">
-                    <h2>Añadir Nueva Transacción</h2>
+                    <h2>Registrar Nueva Transacción</h2>
                 </div>
-                <form id="transaction-form">
+                <form id="add-transaction-form">
                     <div class="form-group">
                         <label for="transaction-date" class="form-label">Fecha:</label>
                         <input type="date" id="transaction-date" class="form-input" required>
@@ -1108,1235 +1067,181 @@ h3 { font-size: var(--font-size-xl); }
                     <div class="form-group">
                         <label for="transaction-movement" class="form-label">Movimiento:</label>
                         <select id="transaction-movement" class="form-select" required>
-                            <option value="">Selecciona un movimiento</option>
+                            <option value="">Seleccione...</option>
                             <option value="Ingreso">Ingreso</option>
-                            <option value="Egreso">Egreso</option>
+                            <option value="Gasto">Gasto</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="transaction-type" class="form-label">Tipo:</label>
                         <select id="transaction-type" class="form-select" required>
-                            <option value="">Selecciona un tipo</option>
+                            <option value="">Seleccione movimiento primero...</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="transaction-description" class="form-label">Descripción (Opcional):</label>
-                        <textarea id="transaction-description" class="form-textarea" rows="3"></textarea>
+                        <label for="transaction-description" class="form-label">Descripción:</label>
+                        <input type="text" id="transaction-description" class="form-input" placeholder="Ej. Alquiler, Salario, Comida">
                     </div>
                     <div class="form-group">
                         <label for="transaction-amount" class="form-label">Monto:</label>
                         <input type="number" id="transaction-amount" class="form-input" step="0.01" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i data-feather="save"></i> Guardar Transacción
-                    </button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="save"></i> Guardar Transacción
+                        </button>
+                    </div>
                 </form>
             </div>
 
             <div id="predefined-types-tab" class="tab-content">
                 <div class="section-header">
-                    <h2>Gestionar Tipos Predefinidos</h2>
-                    <button id="add-predefined-button" class="btn btn-outline">
-                        <i data-feather="plus"></i> Añadir Nuevo Tipo
+                    <h2>Tipos Predefinidos</h2>
+                    <button class="btn btn-primary" id="add-predefined-button">
+                        <i data-feather="plus"></i> Añadir Tipo
                     </button>
                 </div>
-
-                <h3 class="mt-lg">Ingresos Predefinidos</h3>
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Movimiento</th>
                                 <th>Tipo</th>
-                                <th>Descripción</th>
+                                <th>Descripción Sugerida</th>
                                 <th>Monto Sugerido</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="predefined-incomes-list">
+                        <tbody id="predefined-types-table-body">
                             </tbody>
                     </table>
                 </div>
-
-                <h3 class="mt-lg">Egresos Predefinidos</h3>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Movimiento</th>
-                                <th>Tipo</th>
-                                <th>Descripción</th>
-                                <th>Monto Sugerido</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="predefined-expenses-list">
-                            </tbody>
-                    </table>
+                <div id="no-predefined-types-message" class="text-center my-md" style="display: none;">
+                    No hay tipos predefinidos para mostrar.
                 </div>
             </div>
         </section>
-
-        <div id="add-edit-predefined-modal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="predefined-modal-title">Añadir Tipo Predefinido</h2>
-                    <button class="modal-close-button">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <form id="add-predefined-form">
-                    <input type="hidden" id="predefined-original-movement">
-                    <input type="hidden" id="predefined-original-type">
-
-                    <div class="form-group">
-                        <label for="predefined-movement" class="form-label">Movimiento:</label>
-                        <select id="predefined-movement" class="form-select" required>
-                            <option value="">Selecciona un movimiento</option>
-                            <option value="Ingreso">Ingreso</option>
-                            <option value="Egreso">Egreso</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="predefined-type" class="form-label">Tipo:</label>
-                        <input type="text" id="predefined-type" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="predefined-description" class="form-label">Descripción (Opcional):</label>
-                        <textarea id="predefined-description" class="form-textarea" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="predefined-suggested-amount" class="form-label">Monto Sugerido (Opcional):</label>
-                        <input type="number" id="predefined-suggested-amount" class="form-input" step="0.01" value="0">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary modal-cancel-button">Cancelar</button>
-                        <button type="submit" id="submit-predefined-button" class="btn btn-primary">Guardar Tipo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="edit-transaction-modal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Editar Transacción</h2>
-                    <button class="modal-close-button">
-                        <i data-feather="x"></i>
-                    </button>
-                </div>
-                <form id="edit-transaction-form">
-                    <input type="hidden" id="edit-transaction-id">
-                    <div class="form-group">
-                        <label for="edit-transaction-date" class="form-label">Fecha:</label>
-                        <input type="date" id="edit-transaction-date" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-transaction-movement" class="form-label">Movimiento:</label>
-                        <select id="edit-transaction-movement" class="form-select" required>
-                            <option value="Ingreso">Ingreso</option>
-                            <option value="Egreso">Egreso</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-transaction-type" class="form-label">Tipo</label>
-                        <input type="text" id="edit-transaction-type" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-transaction-description" class="form-label">Descripción (Opcional)</label>
-                        <textarea id="edit-transaction-description" class="form-textarea" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-transaction-amount" class="form-label">Monto</label>
-                        <input type="number" id="edit-transaction-amount" class="form-input" step="0.01" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary modal-cancel-button">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="toast-container" id="toast-container"></div>
-
     </div>
 
-    <script>
-        // Registrar el plugin datalabels globalmente
-        Chart.register(ChartDataLabels);
-
-        // --- Constantes y Elementos del DOM ---
-        // ¡IMPORTANTE! Reemplaza esta URL con la de tu Web App de Google Apps Script DESPUÉS DE DESPLEGARLA
-        // La URL debe terminar en /exec
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbymBcf4ut-aL3DJshdpiO5t3UEEJiIT8PmWVPYqSIl_-nW8PST_BoZVmHVV2vlZsBM36w/exec';
-
-        // Secciones principales
-        const loginSection = document.getElementById('login-section');
-        const appSection = document.getElementById('app-section');
-        const loadingOverlay = document.getElementById('loading-overlay'); // Loader
-
-        // Formularios y botones de login
-        const loginForm = document.getElementById('login-form');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const logoutButton = document.getElementById('logout-button');
-
-        // Elementos del Dashboard
-        const dashboardMonthSelect = document.getElementById('dashboard-month-select');
-        const dashboardYearSelect = document.getElementById('dashboard-year-select');
-        const dashboardPeriodSpan = document.getElementById('dashboard-period');
-        const cardIncomeTitle = document.getElementById('card-income-title');
-        const cardExpenseTitle = document.getElementById('card-expense-title');
-        const totalIncomeMonthElement = document.getElementById('total-income-month');
-        const totalExpenseMonthElement = document.getElementById('total-expense-month');
-        const currentBalanceElement = document.getElementById('current-balance');
-        const financialChartCanvas = document.getElementById('financial-chart');
-        const incomeByTypeChartCanvas = document.getElementById('income-by-type-chart');
-        const expenseByTypeChartCanvas = document.getElementById('expense-by-type-chart');
-        const incomeTypePeriodSpan = document.getElementById('income-type-period');
-        const expenseTypePeriodSpan = document.getElementById('expense-type-period');
-        let financialChart; // Instancia de Chart.js para ingresos vs egresos
-        let incomeByTypeChart; // Instancia de Chart.js para ingresos por tipo
-        let expenseByTypeChart; // Instancia de Chart.js para egresos por tipo
-
-        // Elementos de la tabla de Movimientos
-        const transactionsList = document.getElementById('transactions-list');
-        const transactionForm = document.getElementById('transaction-form');
-        const transactionDateInput = document.getElementById('transaction-date');
-        const transactionMovementSelect = document.getElementById('transaction-movement');
-        const transactionTypeSelect = document.getElementById('transaction-type');
-        const transactionDescriptionInput = document.getElementById('transaction-description');
-        const transactionAmountInput = document.getElementById('transaction-amount');
-
-        // Elementos para Tipos Predefinidos
-        const addPredefinedButton = document.getElementById('add-predefined-button');
-        const addPredefinedForm = document.getElementById('add-predefined-form'); // Este es el formulario dentro del modal
-        const predefinedIncomesList = document.getElementById('predefined-incomes-list');
-        const predefinedExpensesList = document.getElementById('predefined-expenses-list');
-
-        // Elementos del modal Añadir/Editar Predefinido
-        const addEditPredefinedModal = document.getElementById('add-edit-predefined-modal');
-        const predefinedModalTitle = document.getElementById('predefined-modal-title');
-        const predefinedMovementSelect = document.getElementById('predefined-movement');
-        const predefinedTypeInput = document.getElementById('predefined-type');
-        const predefinedDescriptionInput = document.getElementById('predefined-description');
-        const predefinedSuggestedAmountInput = document.getElementById('predefined-suggested-amount');
-        const predefinedOriginalMovementInput = document.getElementById('predefined-original-movement');
-        const predefinedOriginalTypeInput = document.getElementById('predefined-original-type');
-        const submitPredefinedButton = document.getElementById('submit-predefined-button');
-
-        // Elementos del modal Editar Transacción
-        const editTransactionModal = document.getElementById('edit-transaction-modal');
-        const editTransactionIdInput = document.getElementById('edit-transaction-id');
-        const editTransactionDateInput = document.getElementById('edit-transaction-date');
-        const editTransactionMovementSelect = document.getElementById('edit-transaction-movement');
-        const editTransactionTypeInput = document.getElementById('edit-transaction-type'); // Cambiado a input[type="text"]
-        const editTransactionDescriptionInput = document.getElementById('edit-transaction-description');
-        const editTransactionAmountInput = document.getElementById('edit-transaction-amount');
-        const editTransactionForm = document.getElementById('edit-transaction-form');
-
-        // Toast
-        const toastContainer = document.getElementById('toast-container'); // Contenedor para múltiples toasts
-
-        // Filtros
-        const filterMonthSelect = document.getElementById('filter-month');
-        const filterTypeSelect = document.getElementById('filter-type');
-        const filterMovementSelect = document.getElementById('filter-movement');
-        const filterKeywordsInput = document.getElementById('filter-keywords');
-        const applyFiltersButton = document.getElementById('apply-filters-button');
-
-        let allTransactions = []; // Almacena todas las Movimientos para filtrado
-        let predefinedTypes = { incomes: [], expenses: [] }; // Almacena tipos predefinidos
-
-        // --- Funciones de Utilidad ---
-
-        // Muestra el overlay de carga
-        function showLoading(message = 'Cargando...') {
-            document.querySelector('#loading-overlay .loader-text').textContent = message;
-            loadingOverlay.style.display = 'flex';
-        }
-
-        // Oculta el overlay de carga
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        // Función general para hacer peticiones al Apps Script
-        async function fetchData(action, data = {}, method = 'GET') {
-            showLoading('Procesando...'); // Mostrar loader al inicio de cada petición
-            let url = `${WEB_APP_URL}?action=${action}`;
-            let options = {
-                method: method,
-                redirect: 'follow',
-            };
-
-            if (method === 'POST') {
-                options.headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                };
-                options.body = new URLSearchParams(data).toString();
-            } else if (method === 'GET') {
-                const params = new URLSearchParams(data).toString();
-                if (params) {
-                    url += `&${params}`;
-                }
-            }
-
-            try {
-                const response = await fetch(url, options);
-                if (!response.ok && response.status !== 0) {
-                    const errorText = await response.text();
-                    console.error(`Error HTTP: ${response.status} - ${response.statusText}`, errorText);
-                    throw new Error(`Error en el servidor: ${response.status} - ${response.statusText}. Detalles: ${errorText.substring(0, 200)}...`);
-                }
-                if (response.status === 0) {
-                    throw new Error('La solicitud fue bloqueada por la política CORS o un error de red. Asegúrate de que tu Apps Script esté publicado correctamente con "Acceso: Cualquiera" y que la URL en tu HTML sea la correcta.');
-                }
-                const responseText = await response.text();
-                return responseText ? JSON.parse(responseText) : { status: 'success', message: 'Operación OPTIONS o respuesta vacía exitosa.' };
-            } catch (error) {
-                console.error(`Error en fetchData para acción ${action}:`, error);
-                showToast(`Error de red o CORS: ${error.message}`, 'error');
-                throw error;
-            } finally {
-                hideLoading(); // Ocultar loader al finalizar la petición
-            }
-        }
-
-        // Muestra notificaciones de tipo "toast"
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.classList.add('toast-message', type);
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-
-            // Trigger reflow to ensure animation plays
-            void toast.offsetWidth;
-
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-            }, duration);
-        }
-
-        // Obtiene el saludo según la hora del día
-        function getGreeting() {
-            const hour = new Date().getHours();
-            if (hour < 12) return "Buenos días";
-            if (hour < 18) return "Buenas tardes";
-            return "Buenas noches";
-        }
-
-        // Abre un modal
-        function openModal(modalElement) {
-            modalElement.classList.add('is-visible');
-        }
-
-        // Cierra un modal
-        function closeModal(modalElement) {
-            modalElement.classList.remove('is-visible');
-        }
-
-        // Event listeners para cerrar modales
-        document.querySelectorAll('.modal-overlay .modal-close-button, .modal-overlay .modal-cancel-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                closeModal(e.target.closest('.modal-overlay'));
-            });
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target.classList.contains('modal-overlay')) {
-                closeModal(event.target);
-            }
-        });
-
-
-        // --- Lógica de Autenticación ---
-
-        async function handleLogin(event) {
-            event.preventDefault();
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            try {
-                const result = await fetchData('authenticateUser', { username, password }, 'GET');
-                if (result.status === 'success') {
-                    localStorage.setItem('loggedIn', 'true');
-                    localStorage.setItem('username', username); // Guardar el username
-                    loginSection.style.display = 'none';
-                    appSection.style.display = 'flex';
-                    const greeting = getGreeting();
-                    showToast(`${greeting}, ${username}! Dios te proveerá.`, 'success', 5000); // Saludo personalizado
-                    initializeDashboardControls(); // Configura los select de mes/año del dashboard
-                    loadAppData(); // Cargar datos al iniciar sesión
-                    feather.replace(); // Replace Feather icons after content is loaded
-                } else {
-                    showToast(result.message, 'error');
-                }
-            } catch (error) {
-                console.error('Error durante la autenticación:', error);
-                showToast('Error de conexión o en el servidor.', 'error');
-            }
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('username'); // Limpiar username
-            loginSection.style.display = 'flex';
-            appSection.style.display = 'none';
-            usernameInput.value = '';
-            passwordInput.value = '';
-            showToast('Sesión cerrada. ¡Vuelve pronto!', 'info');
-            // Limpiar datos y gráficos si es necesario
-            allTransactions = [];
-            if (financialChart) financialChart.destroy();
-            if (incomeByTypeChart) incomeByTypeChart.destroy();
-            if (expenseByTypeChart) expenseByTypeChart.destroy();
-            updateDashboardSummary(0, 0, 0); // Resetear a 0 visualmente
-            renderTransactions([]);
-            renderPredefinedTypes({incomes: [], expenses: []});
-        }
-
-
-        // --- Lógica General de la Aplicación ---
-
-        // Carga todos los datos necesarios al iniciar o recargar
-        async function loadAppData() {
-            try {
-                showLoading('Cargando tus finanzas...');
-                const [transactionsResult, predefinedResult] = await Promise.all([
-                    fetchData('getAllTransactions', {}, 'GET'),
-                    fetchData('getPredefinedTypes', {}, 'GET')
-                ]);
-
-                if (transactionsResult.status === 'success') {
-                    allTransactions = transactionsResult.data || [];
-                    applyFilters(); // Aplica filtros iniciales al cargar
-                    updateDashboard(); // Actualizar dashboard con los filtros seleccionados
-                } else {
-                    showToast(`Error al cargar Movimientos: ${transactionsResult.message}`, 'error');
-                    allTransactions = [];
-                }
-
-                if (predefinedResult.status === 'success') {
-                    predefinedTypes.incomes = predefinedResult.incomes || [];
-                    predefinedTypes.expenses = predefinedResult.expenses || [];
-                    renderPredefinedTypes(predefinedTypes); // Renderizar tipos predefinidos
-                    updateTransactionTypeSelects(); // Actualizar select de tipos en formulario de transacción
-                    updateFilterTypeSelect(); // Actualizar select de tipo en filtros
-                } else {
-                    showToast(`Error al cargar Tipos Predefinidos: ${predefinedResult.message}`, 'error');
-                    predefinedTypes = { incomes: [], expenses: [] };
-                }
-                feather.replace(); // Replace Feather icons after dynamic content is loaded
-
-            } catch (error) {
-                console.error('Error general al cargar datos de la aplicación:', error);
-                showToast('No se pudieron cargar todos los datos. Intenta recargar.', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Inicializa y configura los select de mes y año del dashboard
-        function initializeDashboardControls() {
-            const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth() + 1; // getMonth() es 0-index
-
-            // Llenar el select de año (ej. 5 años atrás a 2 años adelante)
-            dashboardYearSelect.innerHTML = ''; // Limpiar opciones existentes
-            for (let i = currentYear - 5; i <= currentYear + 2; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                dashboardYearSelect.appendChild(option);
-            }
-
-            // Establecer el mes y año actuales como seleccionados por defecto
-            dashboardMonthSelect.value = currentMonth;
-            dashboardYearSelect.value = currentYear;
-        }
-
-        // --- Lógica del Dashboard ---
-
-        async function updateDashboard() {
-            const selectedMonth = dashboardMonthSelect.value;
-            const selectedYear = dashboardYearSelect.value;
-            const username = localStorage.getItem('username');
-
-            if (!username) {
-                showToast('Usuario no autenticado para actualizar el dashboard.', 'error');
-                return;
-            }
-
-            showLoading('Actualizando dashboard...');
-            try {
-                const data = await fetchData('getDashboardData', {
-                    username: username,
-                    month: selectedMonth,
-                    year: selectedYear
-                }, 'GET');
-
-                if (data.status === 'success') {
-                    const { totalIncome, totalExpense, currentBalance, incomeByMonth, expenseByMonth, incomeByType, expenseByType } = data;
-                    updateDashboardSummary(totalIncome, totalExpense, currentBalance);
-                    renderFinancialChart(incomeByMonth, expenseByMonth);
-                    renderIncomeByTypeChart(incomeByType);
-                    renderExpenseByTypeChart(expenseByType);
-                    dashboardPeriodSpan.textContent = `(${dashboardMonthSelect.options[dashboardMonthSelect.selectedIndex].text} ${selectedYear})`;
-                    incomeTypePeriodSpan.textContent = `(${dashboardMonthSelect.options[dashboardMonthSelect.selectedIndex].text} ${selectedYear})`;
-                    expenseTypePeriodSpan.textContent = `(${dashboardMonthSelect.options[dashboardMonthSelect.selectedIndex].text} ${selectedYear})`;
-
-                } else {
-                    showToast(`Error al cargar datos del dashboard: ${data.message}`, 'error');
-                    updateDashboardSummary(0, 0, 0); // Resetear a 0 si hay error
-                    if (financialChart) financialChart.destroy();
-                    if (incomeByTypeChart) incomeByTypeChart.destroy();
-                    if (expenseByTypeChart) expenseByTypeChart.destroy();
-                }
-            } catch (error) {
-                console.error('Error al actualizar el dashboard:', error);
-                showToast('Error de conexión al actualizar el dashboard.', 'error');
-                updateDashboardSummary(0, 0, 0);
-                if (financialChart) financialChart.destroy();
-                if (incomeByTypeChart) incomeByTypeChart.destroy();
-                if (expenseByTypeChart) expenseByTypeChart.destroy();
-            } finally {
-                hideLoading();
-            }
-        }
-
-
-        function updateDashboardSummary(income, expense, balance) {
-            totalIncomeMonthElement.textContent = `$${income.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            totalExpenseMonthElement.textContent = `$${expense.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            currentBalanceElement.textContent = `$${balance.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            currentBalanceElement.style.color = balance >= 0 ? 'var(--color-success)' : 'var(--color-error)';
-            cardIncomeTitle.style.color = 'var(--color-success)';
-            cardExpenseTitle.style.color = 'var(--color-error)';
-        }
-
-
-        function renderFinancialChart(incomeData, expenseData) {
-            if (financialChart) financialChart.destroy(); // Destruir instancia anterior si existe
-
-            const months = Array.from({ length: 12 }, (_, i) => {
-                const date = new Date(0, i); // Usar un año ficticio, solo para obtener el nombre del mes
-                return date.toLocaleString('es-ES', { month: 'short' });
-            });
-
-            financialChart = new Chart(financialChartCanvas, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        {
-                            label: 'Ingresos',
-                            data: incomeData,
-                            backgroundColor: 'rgba(40, 167, 69, 0.7)', // Verde success
-                            borderColor: 'rgba(40, 167, 69, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Egresos',
-                            data: expenseData,
-                            backgroundColor: 'rgba(220, 53, 69, 0.7)', // Rojo error
-                            borderColor: 'rgba(220, 53, 69, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                },
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            }
-                        },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (value) => value > 0 ? `$${value.toLocaleString('es-CO')}` : '',
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += `$${context.parsed.y.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    family: 'Inter'
-                                },
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return `$${value.toLocaleString('es-CO')}`;
-                                },
-                                font: {
-                                    family: 'Inter'
-                                },
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-
-        function renderIncomeByTypeChart(data) {
-            if (incomeByTypeChart) incomeByTypeChart.destroy();
-
-            const labels = data.map(item => item.type);
-            const amounts = data.map(item => item.amount);
-
-            incomeByTypeChart = new Chart(incomeByTypeChartCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: amounts,
-                        backgroundColor: [
-                            '#4A90E2', // Azul
-                            '#50E3C2', // Menta
-                            '#F5A623', // Naranja
-                            '#9B59B6', // Morado
-                            '#EB5757', // Rojo
-                            '#27AE60', // Verde Esmeralda
-                            '#E67E22', // Naranja Fuerte
-                            '#3498DB', // Azul Claro
-                            '#8E44AD', // Violeta
-                            '#2ECC71'  // Verde Brillante
-                        ],
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                },
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            }
-                        },
-                        datalabels: {
-                            formatter: (value, context) => {
-                                const sum = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = sum > 0 ? ((value / sum) * 100).toFixed(1) + '%' : '';
-                                return percentage;
-                            },
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 12
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += `$${context.parsed.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderExpenseByTypeChart(data) {
-            if (expenseByTypeChart) expenseByTypeChart.destroy();
-
-            const labels = data.map(item => item.type);
-            const amounts = data.map(item => item.amount);
-
-            expenseByTypeChart = new Chart(expenseByTypeChartCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: amounts,
-                        backgroundColor: [
-                            '#FF6384', // Rojo Coral
-                            '#36A2EB', // Azul Cielo
-                            '#FFCE56', // Amarillo Mostaza
-                            '#4BC0C0', // Verde Azulado
-                            '#9966FF', // Púrpura
-                            '#FF9F40', // Naranja Cítrico
-                            '#B22222', // Rojo Ladrillo
-                            '#20B2AA', // Verde Mar
-                            '#DA70D6', // Orquídea
-                            '#6A5ACD'  // Azul Pizarra
-                        ],
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                },
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-800'),
-                            }
-                        },
-                        datalabels: {
-                            formatter: (value, context) => {
-                                const sum = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = sum > 0 ? ((value / sum) * 100).toFixed(1) + '%' : '';
-                                return percentage;
-                            },
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 12
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += `$${context.parsed.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-
-        // --- Lógica de Movimientos ---
-
-        async function handleTransactionSubmit(event) {
-            event.preventDefault();
-
-            const transactionData = {
-                username: localStorage.getItem('username'),
-                date: transactionDateInput.value,
-                movement: transactionMovementSelect.value,
-                type: transactionTypeSelect.value,
-                description: transactionDescriptionInput.value,
-                amount: parseFloat(transactionAmountInput.value),
-            };
-
-            if (isNaN(transactionData.amount) || transactionData.amount <= 0) {
-                showToast('Por favor, ingresa un monto válido y mayor que cero.', 'error');
-                return;
-            }
-
-            try {
-                const result = await fetchData('addTransaction', transactionData, 'POST');
-                if (result.status === 'success') {
-                    showToast('Transacción guardada con éxito!', 'success');
-                    transactionForm.reset();
-                    transactionDateInput.value = new Date().toISOString().split('T')[0]; // Resetear fecha a hoy
-                    // Recargar todos los datos para reflejar el cambio
-                    loadAppData();
-                    switchTab('transactions'); // Ir a la pestaña de movimientos
-                } else {
-                    showToast(`Error al guardar transacción: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Error al enviar transacción:', error);
-                showToast('Error de conexión o en el servidor al guardar la transacción.', 'error');
-            }
-        }
-
-        async function handleEditTransactionSubmit(event) {
-            event.preventDefault();
-
-            const transactionData = {
-                username: localStorage.getItem('username'),
-                id: editTransactionIdInput.value,
-                date: editTransactionDateInput.value,
-                movement: editTransactionMovementSelect.value,
-                type: editTransactionTypeInput.value,
-                description: editTransactionDescriptionInput.value,
-                amount: parseFloat(editTransactionAmountInput.value),
-            };
-
-            if (isNaN(transactionData.amount) || transactionData.amount <= 0) {
-                showToast('Por favor, ingresa un monto válido y mayor que cero.', 'error');
-                return;
-            }
-
-            try {
-                const result = await fetchData('updateTransaction', transactionData, 'POST');
-                if (result.status === 'success') {
-                    showToast('Transacción actualizada con éxito!', 'success');
-                    closeModal(editTransactionModal);
-                    loadAppData(); // Recargar todos los datos
-                } else {
-                    showToast(`Error al actualizar transacción: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Error al actualizar transacción:', error);
-                showToast('Error de conexión o en el servidor al actualizar la transacción.', 'error');
-            }
-        }
-
-
-        async function deleteTransaction(id) {
-            if (!confirm('¿Estás seguro de que quieres eliminar esta transacción?')) {
-                return;
-            }
-            const username = localStorage.getItem('username');
-            try {
-                const result = await fetchData('deleteTransaction', { username, id }, 'POST');
-                if (result.status === 'success') {
-                    showToast('Transacción eliminada con éxito!', 'info');
-                    loadAppData(); // Recargar todos los datos
-                } else {
-                    showToast(`Error al eliminar transacción: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Error al eliminar transacción:', error);
-                showToast('Error de conexión o en el servidor al eliminar la transacción.', 'error');
-            }
-        }
-
-
-        function renderTransactions(transactions) {
-            transactionsList.innerHTML = ''; // Limpiar la tabla
-            if (transactions.length === 0) {
-                transactionsList.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos para el período o filtros seleccionados.</td></tr>';
-                return;
-            }
-
-            transactions.forEach(transaction => {
-                const row = transactionsList.insertRow(); // Define row here
-                // Ensure transaction.amount is a number, default to 0 if not
-                const amountValue = parseFloat(transaction.amount) || 0;
-                const formattedDate = dateFns.format(new Date(transaction.date), 'dd/MM/yyyy');
-                const formattedAmount = `$${amountValue.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                const movementClass = transaction.movement === 'Ingreso' ? 'text-income' : 'text-expense';
-                const badgeClass = transaction.movement === 'Ingreso' ? 'income' : 'expense';
-
-                row.innerHTML = `
-                    <td>${transaction.id}</td>
-                    <td>${formattedDate}</td>
-                    <td><span class="status-badge ${badgeClass}">${transaction.movement}</span></td>
-                    <td>${transaction.type}</td>
-                    <td>${transaction.description || '-'}</td>
-                    <td class="${movementClass}">${formattedAmount}</td>
-                    <td>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary btn-sm edit-btn" data-id="${transaction.id}">
-                                <i data-feather="edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="${transaction.id}">
-                                <i data-feather="trash-2"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-
-                row.querySelector('.edit-btn').addEventListener('click', () => openEditTransactionModal(transaction));
-                row.querySelector('.delete-btn').addEventListener('click', () => deleteTransaction(transaction.id));
-            });
-            feather.replace(); // Replace Feather icons after dynamic content is added
-        }
-
-
-        function applyFilters() {
-            let filteredTransactions = [...allTransactions]; // Copia de todos los movimientos
-
-            const month = filterMonthSelect.value;
-            const type = filterTypeSelect.value;
-            const movement = filterMovementSelect.value;
-            const keywords = filterKeywordsInput.value.toLowerCase();
-
-            if (month) {
-                filteredTransactions = filteredTransactions.filter(t => new Date(t.date).getMonth() + 1 == parseInt(month));
-            }
-
-            if (type) {
-                filteredTransactions = filteredTransactions.filter(t => t.type === type);
-            }
-
-            if (movement) {
-                filteredTransactions = filteredTransactions.filter(t => t.movement === movement);
-            }
-
-            if (keywords) {
-                filteredTransactions = filteredTransactions.filter(t =>
-                    t.description.toLowerCase().includes(keywords) ||
-                    t.id.toLowerCase().includes(keywords) ||
-                    t.type.toLowerCase().includes(keywords)
-                );
-            }
-
-            renderTransactions(filteredTransactions);
-        }
-
-        function openEditTransactionModal(transaction) {
-            editTransactionIdInput.value = transaction.id;
-            editTransactionDateInput.value = transaction.date;
-            editTransactionMovementSelect.value = transaction.movement;
-            editTransactionTypeInput.value = transaction.type;
-            editTransactionDescriptionInput.value = transaction.description;
-            editTransactionAmountInput.value = transaction.amount;
-            openModal(editTransactionModal);
-            feather.replace(); // Replace Feather icons in the modal
-        }
-
-
-        // --- Lógica de Tipos Predefinidos ---
-
-        async function handleAddPredefinedType(event) {
-            event.preventDefault();
-
-            const isEdit = predefinedOriginalMovementInput.value !== '' && predefinedOriginalTypeInput.value !== '';
-            
-            const newPredefinedType = {
-                username: localStorage.getItem('username'),
-                movement: predefinedMovementSelect.value,
-                type: predefinedTypeInput.value.trim(),
-                description: predefinedDescriptionInput.value.trim(),
-                suggestedAmount: parseFloat(predefinedSuggestedAmountInput.value) || 0,
-            };
-
-            if (newPredefinedType.type === '') {
-                showToast('El campo "Tipo" no puede estar vacío.', 'error');
-                return;
-            }
-
-            if (isEdit) {
-                newPredefinedType.originalMovement = predefinedOriginalMovementInput.value;
-                newPredefinedType.originalType = predefinedOriginalTypeInput.value;
-            }
-
-            try {
-                const action = isEdit ? 'updatePredefinedType' : 'addPredefinedType';
-                const result = await fetchData(action, newPredefinedType, 'POST');
-
-                if (result.status === 'success') {
-                    showToast(`Tipo predefinido ${isEdit ? 'actualizado' : 'añadido'} con éxito!`, 'success');
-                    addPredefinedForm.reset();
-                    closeModal(addEditPredefinedModal);
-                    loadAppData(); // Recargar datos para actualizar las listas y los selects
-                } else {
-                    showToast(`Error al ${isEdit ? 'actualizar' : 'añadir'} tipo predefinido: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error(`Error al ${isEdit ? 'actualizar' : 'añadir'} tipo predefinido:`, error);
-                showToast('Error de conexión o en el servidor.', 'error');
-            }
-        }
-
-
-        async function deletePredefinedType(movement, type) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este tipo predefinido? Esta acción no se puede deshacer.')) {
-                return;
-            }
-            const username = localStorage.getItem('username');
-            try {
-                const result = await fetchData('deletePredefinedType', { username, movement, type }, 'POST');
-                if (result.status === 'success') {
-                    showToast('Tipo predefinido eliminado con éxito!', 'info');
-                    loadAppData(); // Recargar datos
-                } else {
-                    showToast(`Error al eliminar tipo predefinido: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Error al eliminar tipo predefinido:', error);
-                showToast('Error de conexión o en el servidor al eliminar el tipo predefinido.', 'error');
-            }
-        }
-
-
-        function renderPredefinedTypes(types) {
-            predefinedIncomesList.innerHTML = '';
-            predefinedExpensesList.innerHTML = '';
-
-            if (types.incomes.length === 0) {
-                predefinedIncomesList.innerHTML = '<tr><td colspan="5" class="text-center">No hay tipos de ingresos predefinidos.</td></tr>';
-            } else {
-                types.incomes.forEach(type => {
-                    const row = predefinedIncomesList.insertRow(); // Define row here
-                    const amountValue = parseFloat(type.suggestedAmount) || 0; // Ensure it's a number
-                    const formattedAmount = `$${amountValue.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    row.innerHTML = `
-                        <td><span class="status-badge income">${type.movement}</span></td>
-                        <td>${type.type}</td>
-                        <td>${type.description || '-'}</td>
-                        <td>${formattedAmount}</td>
-                        <td>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary btn-sm edit-predefined-btn" data-movement="${type.movement}" data-type="${type.type}">
-                                    <i data-feather="edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-predefined-btn" data-movement="${type.movement}" data-type="${type.type}">
-                                    <i data-feather="trash-2"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    row.querySelector('.edit-predefined-btn').addEventListener('click', () => openEditPredefinedModal(type));
-                    row.querySelector('.delete-predefined-btn').addEventListener('click', () => deletePredefinedType(type.movement, type.type));
-                });
-            }
-
-            if (types.expenses.length === 0) {
-                predefinedExpensesList.innerHTML = '<tr><td colspan="5" class="text-center">No hay tipos de egresos predefinidos.</td></tr>';
-            } else {
-                types.expenses.forEach(type => {
-                    const row = predefinedExpensesList.insertRow(); // Define row here
-                    const amountValue = parseFloat(type.suggestedAmount) || 0; // Ensure it's a number
-                    const formattedAmount = `$${amountValue.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                    row.innerHTML = `
-                        <td><span class="status-badge expense">${type.movement}</span></td>
-                        <td>${type.type}</td>
-                        <td>${type.description || '-'}</td>
-                        <td>${formattedAmount}</td>
-                        <td>
-                            <div class="table-actions">
-                                <button class="btn btn-secondary btn-sm edit-predefined-btn" data-movement="${type.movement}" data-type="${type.type}">
-                                    <i data-feather="edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-predefined-btn" data-movement="${type.movement}" data-type="${type.type}">
-                                    <i data-feather="trash-2"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    row.querySelector('.edit-predefined-btn').addEventListener('click', () => openEditPredefinedModal(type));
-                    row.querySelector('.delete-predefined-btn').addEventListener('click', () => deletePredefinedType(type.movement, type.type));
-                });
-            }
-            feather.replace(); // Replace Feather icons after dynamic content is added
-        }
-
-
-        function openAddPredefinedModal() {
-            predefinedModalTitle.textContent = 'Añadir Tipo Predefinido';
-            addPredefinedForm.reset();
-            predefinedOriginalMovementInput.value = ''; // Limpiar para modo añadir
-            predefinedOriginalTypeInput.value = ''; // Limpiar para modo añadir
-            submitPredefinedButton.innerHTML = '<i data-feather="save"></i> Guardar Tipo';
-            openModal(addEditPredefinedModal);
-            feather.replace(); // Replace Feather icons in the modal
-        }
-
-        function openEditPredefinedModal(typeData) {
-            predefinedModalTitle.textContent = 'Editar Tipo Predefinido';
-            predefinedMovementSelect.value = typeData.movement;
-            predefinedTypeInput.value = typeData.type;
-            predefinedDescriptionInput.value = typeData.description || '';
-            predefinedSuggestedAmountInput.value = typeData.suggestedAmount || 0;
-            
-            predefinedOriginalMovementInput.value = typeData.movement; // Guardar valores originales
-            predefinedOriginalTypeInput.value = typeData.type; // Guardar valores originales
-
-            submitPredefinedButton.innerHTML = '<i data-feather="refresh-ccw"></i> Actualizar Tipo';
-            openModal(addEditPredefinedModal);
-            feather.replace(); // Replace Feather icons in the modal
-        }
-
-
-        // Actualiza los <select> de tipo de transacción con los tipos predefinidos
-        function updateTransactionTypeSelects() {
-            // Select de añadir nueva transacción
-            transactionTypeSelect.innerHTML = '<option value="">Selecciona un tipo</option>';
-            if (transactionMovementSelect.value === 'Ingreso') {
-                predefinedTypes.incomes.forEach(type => {
-                    const option = document.createElement('option');
-                    option.value = type.type;
-                    option.textContent = type.type;
-                    transactionTypeSelect.appendChild(option);
-                });
-            } else if (transactionMovementSelect.value === 'Egreso') {
-                predefinedTypes.expenses.forEach(type => {
-                    const option = document.createElement('option');
-                    option.value = type.type;
-                    option.textContent = type.type;
-                    transactionTypeSelect.appendChild(option);
-                });
-            }
-        }
-
-        // Auto-rellena campos de transacción basándose en tipos predefinidos
-        function autoFillTransactionFields() {
-            const selectedMovement = transactionMovementSelect.value;
-            const selectedType = transactionTypeSelect.value;
-            let foundType = null;
-
-            if (selectedMovement === 'Ingreso') {
-                foundType = predefinedTypes.incomes.find(t => t.type === selectedType);
-            } else if (selectedMovement === 'Egreso') {
-                foundType = predefinedTypes.expenses.find(t => t.type === selectedType);
-            }
-
-            if (foundType) {
-                transactionDescriptionInput.value = foundType.description || '';
-                transactionAmountInput.value = foundType.suggestedAmount || '';
-            } else {
-                // Si no se encuentra o no hay tipo seleccionado, limpiar campos
-                transactionDescriptionInput.value = '';
-                transactionAmountInput.value = '';
-            }
-        }
-
-
-        // Actualiza el select de tipo en los filtros
-        function updateFilterTypeSelect() {
-            filterTypeSelect.innerHTML = '<option value="">Todos</option>';
-            const allUniqueTypes = new Set();
-
-            predefinedTypes.incomes.forEach(type => allUniqueTypes.add(type.type));
-            predefinedTypes.expenses.forEach(type => allUniqueTypes.add(type.type));
-
-            Array.from(allUniqueTypes).sort().forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                filterTypeSelect.appendChild(option);
-            });
-        }
-
-
-        // --- Lógica de Pestañas ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-            document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
-
-            // Lógica específica para cada pestaña al activarse
-            if (tabId === 'dashboard') {
-                updateDashboard();
-            } else if (tabId === 'transactions') {
-                applyFilters(); // Re-aplicar filtros para asegurar que se muestren los datos más recientes
-            } else if (tabId === 'add-transaction') {
-                transactionDateInput.value = new Date().toISOString().split('T')[0]; // Fecha actual por defecto
-                updateTransactionTypeSelects(); // Asegurar que los tipos estén actualizados
-                transactionForm.reset();
-            } else if (tabId === 'predefined-types') {
-                renderPredefinedTypes(predefinedTypes); // Asegurar que la lista de tipos predefinidos esté actualizada
-            }
-            feather.replace(); // Reemplazar íconos de Feather cuando se cambia de pestaña
-        }
-
-
-        // --- Inicialización y Event Listeners ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar Feather Icons
-            feather.replace();
-
-            // Verificar estado de login al cargar la página
-            if (localStorage.getItem('loggedIn') === 'true') {
-                loginSection.style.display = 'none';
-                appSection.style.display = 'flex';
-                initializeDashboardControls();
-                loadAppData();
-            } else {
-                loginSection.style.display = 'flex';
-                appSection.style.display = 'none';
-            }
-
-            // Event listeners de navegación por pestañas
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    switchTab(button.dataset.tab);
-                });
-            });
-
-            // Event listeners de login/logout
-            loginForm.addEventListener('submit', handleLogin);
-            logoutButton.addEventListener('click', handleLogout);
-
-            // Event listeners para el formulario de transacción
-            transactionForm.addEventListener('submit', handleTransactionSubmit);
-            transactionMovementSelect.addEventListener('change', updateTransactionTypeSelects);
-            
-            // Event listeners para los modales
-            addPredefinedButton.addEventListener('click', openAddPredefinedModal); // Botón para abrir modal "Añadir Tipo"
-            addPredefinedForm.addEventListener('submit', handleAddPredefinedType); // Formulario dentro del modal
-            editTransactionForm.addEventListener('submit', handleEditTransactionSubmit);
-            
-            // Event listeners para auto-rellenado de transacción
-            transactionMovementSelect.addEventListener('change', autoFillTransactionFields);
-            transactionTypeSelect.addEventListener('change', autoFillTransactionFields);
-
-
-            // Set today's date as default for transaction date input
-            transactionDateInput.value = new Date().toISOString().split('T')[0];
-
-            // Event listeners para los filtros
-            applyFiltersButton.addEventListener('click', applyFilters);
-            filterMonthSelect.addEventListener('change', applyFilters);
-            filterTypeSelect.addEventListener('change', applyFilters);
-            filterMovementSelect.addEventListener('change', applyFilters);
-            filterKeywordsInput.addEventListener('input', applyFilters); // Aplica el filtro mientras el usuario escribe
-
-            // Event listeners para controles del dashboard
-            dashboardMonthSelect.addEventListener('change', updateDashboard);
-            dashboardYearSelect.addEventListener('change', updateDashboard);
-        });
-    </script>
+    <div id="edit-transaction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Transacción</h2>
+                <button class="modal-close-button" data-modal-target="edit-transaction-modal">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <form id="edit-transaction-form">
+                <input type="hidden" id="edit-transaction-id">
+                <div class="form-group">
+                    <label for="edit-transaction-date" class="form-label">Fecha:</label>
+                    <input type="date" id="edit-transaction-date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-transaction-movement" class="form-label">Movimiento:</label>
+                    <select id="edit-transaction-movement" class="form-select" required>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-transaction-type" class="form-label">Tipo:</label>
+                    <input type="text" id="edit-transaction-type" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-transaction-description" class="form-label">Descripción:</label>
+                    <input type="text" id="edit-transaction-description" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-transaction-amount" class="form-label">Monto:</label>
+                    <input type="number" id="edit-transaction-amount" class="form-input" step="0.01" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-target="edit-transaction-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-predefined-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Añadir Tipo Predefinido</h2>
+                <button class="modal-close-button" data-modal-target="add-predefined-modal">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <form id="add-predefined-form">
+                <div class="form-group">
+                    <label for="add-predefined-movement" class="form-label">Movimiento:</label>
+                    <select id="add-predefined-movement" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-predefined-type" class="form-label">Tipo:</label>
+                    <input type="text" id="add-predefined-type" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-predefined-description" class="form-label">Descripción Sugerida:</label>
+                    <input type="text" id="add-predefined-description" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="add-predefined-amount" class="form-label">Monto Sugerido:</label>
+                    <input type="number" id="add-predefined-amount" class="form-input" step="0.01">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-target="add-predefined-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Tipo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-predefined-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Tipo Predefinido</h2>
+                <button class="modal-close-button" data-modal-target="edit-predefined-modal">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <form id="edit-predefined-form">
+                <input type="hidden" id="edit-predefined-original-type">
+                <input type="hidden" id="edit-predefined-original-movement">
+                <div class="form-group">
+                    <label for="edit-predefined-movement" class="form-label">Movimiento:</label>
+                    <select id="edit-predefined-movement" class="form-select" required>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-predefined-type" class="form-label">Tipo:</label>
+                    <input type="text" id="edit-predefined-type" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-predefined-description" class="form-label">Descripción Sugerida:</label>
+                    <input type="text" id="edit-predefined-description" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-predefined-amount" class="form-label">Monto Sugerido:</label>
+                    <input type="number" id="edit-predefined-amount" class="form-input" step="0.01">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-target="edit-predefined-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
 </body>
 </html>
